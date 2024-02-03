@@ -12,7 +12,6 @@ module Diagrams
 
     def validate!
       raise EmptyDiagramError, 'Pie diagram must have at least one section' if sections.empty?
-      # raise InvalidPercentageError, 'Pie diagram sections must sum to 100%' unless sections.map(&:percentage).sum == 100
 
       return true if sections.map(&:label).uniq.size == sections.size
 
@@ -38,7 +37,7 @@ module Diagrams
       end
 
       sections.each do |section|
-        puts "#{section.label}: #{section.percentage}%"
+        puts "#{section.label}: #{section.value}%"
       end
     end
 

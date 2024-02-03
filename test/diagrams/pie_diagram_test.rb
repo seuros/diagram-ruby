@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Diagrams
-  class PieDiagramTest < Minitest::Test
+  class PieDiagramTest < DiagramTest
     def test_initialize
       diagram = PieDiagram.new(
         title: 'Pie Diagram',

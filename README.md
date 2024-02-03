@@ -31,16 +31,6 @@ diagram = Diagrams::PieDiagram.new(
         { label: 'D', value: 40 },
     ]
 )
-
-diagram2 = Diagrams::PieDiagram.new(
-    title: 'My Pie Diagram',
-    sections: [
-        { label: 'A', percentage: 10 },
-        { label: 'B', percentage: 20 },
-        { label: 'C', percentage: 30 },
-        { label: 'D', percentage: 40 }
-    ]
-)
 ```
 ## Development
 

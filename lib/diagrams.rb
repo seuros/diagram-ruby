@@ -6,5 +6,6 @@ require 'dry-struct'
 loader = Zeitwerk::Loader.for_gem
 loader.setup
 
+# This module handles diagrams creation and manipulation.
 module Diagrams
 end

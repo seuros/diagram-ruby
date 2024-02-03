@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Diagrams
+  # Abstract class for diagrams
   class AbstractDiagram < Dry::Struct
     module Types
       include Dry.Types()

@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Diagrams
-  class AbstractDiagramTest < Minitest::Test
+  class AbstractDiagramTest < DiagramTest
     def test_initialize
       assert_raises NotImplementedError do
         AbstractDiagram.new
