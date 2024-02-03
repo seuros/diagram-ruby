@@ -3,6 +3,7 @@
     ".": {
       "release-type": "ruby",
       "package-name": "diagram",
+      "version-file": "lib/diagrams/version.rb",
       "bump-patch-for-minor-pre-major": true
     }
   }
