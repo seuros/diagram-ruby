@@ -1,3 +1,5 @@
+## NOT READY FOR USE
+
 # Diagram
 
 Diagram is a gem that allows you to create diagrams in Ruby.

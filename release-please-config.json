@@ -1,4 +1,9 @@
 {
-  "release-type": "ruby",
-  "package-name": "diagrams"
+  "packages": {
+    ".": {
+      "release-type": "ruby",
+      "package-name": "diagram",
+      "bump-patch-for-minor-pre-major": true
+    }
+  }
 }
