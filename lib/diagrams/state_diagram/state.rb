@@ -11,8 +11,7 @@ module Diagrams
       def to_json(*_args)
         {
           id:,
-          label:,
-          type:
+          label:
         }
       end
     end
