@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/seuros/diagram-ruby/compare/diagram/v0.2.1...diagram/v0.2.2) (2024-02-04)
+
+
+### Features
+
+* add .from_hash and .from_json ([82b032b](https://github.com/seuros/diagram-ruby/commit/82b032b8f4a4bb8f9d85f462de26a6a0d7d775a7))
+
 ## [0.2.1](https://github.com/seuros/diagram-ruby/compare/diagram/v0.2.0...diagram/v0.2.1) (2024-02-03)
 
 
