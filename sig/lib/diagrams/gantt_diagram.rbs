@@ -1,0 +1,7 @@
+module Diagrams
+  class GanttDiagram < AbstractDiagram
+    def type: () -> "gantt"
+
+    def to_json: (*untyped _args) -> { title: String, sections: untyped }
+  end
+end

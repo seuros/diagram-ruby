@@ -1,0 +1,13 @@
+module Diagrams
+  class PieDiagram < AbstractDiagram
+    def type: () -> "pie"
+
+    def validate!: () -> (true | untyped)
+
+    def plot: () -> untyped
+
+    def to_json: (*untyped _args) -> { type: "pie", title: String, sections: untyped }
+
+    def valid?: () -> untyped
+  end
+end

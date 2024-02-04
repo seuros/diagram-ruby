@@ -1,0 +1,7 @@
+module Diagrams
+  class FlowchartDiagram < AbstractDiagram
+    def type: () -> "flowchart"
+
+    def to_json: (*untyped _args) -> { id: untyped, nodes: untyped, links: untyped }
+  end
+end

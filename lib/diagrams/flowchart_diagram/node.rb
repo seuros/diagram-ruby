@@ -5,6 +5,13 @@ module Diagrams
     class Node < Dry::Struct
       attribute :id, FlowchartDiagram::Types::String
       attribute :label, FlowchartDiagram::Types::String
+
+      def to_json(*_args)
+        {
+          id:,
+          label:
+        }
+      end
     end
   end
 end

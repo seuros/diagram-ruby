@@ -9,6 +9,14 @@ module Diagrams
         attribute :visibility,
                   ClassDiagram::Types::String.optional.default('public')
                                              .constrained(format: /\A(public|private|protected|Internal)\z/)
+
+        def to_json(*_args)
+          {
+            name:,
+            type:,
+            visibility:
+          }
+        end
       end
     end
   end

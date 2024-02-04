@@ -1,0 +1,7 @@
+module Diagrams
+  class ClassDiagram < AbstractDiagram
+    def type: () -> "classes"
+
+    def to_json: (*untyped _args) -> { id: untyped, classes: untyped }
+  end
+end

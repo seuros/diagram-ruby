@@ -1,0 +1,7 @@
+module Diagrams
+  class StateDiagram < AbstractDiagram
+    def type: () -> "state_machine"
+
+    def to_json: (*untyped _args) -> { id: String, states: untyped, transitions: untyped, events: untyped }
+  end
+end

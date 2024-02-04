@@ -1,0 +1,31 @@
+module Diagrams
+  type string_symbol = String | Symbol
+
+  # Abstract class for diagrams
+  class AbstractDiagram < Dry::Struct
+    module Types
+    end
+
+    def initialize: (*untyped) -> void
+
+    def type: () -> String
+
+    def self.from_hash: (Hash[string_symbol, untyped]) -> AbstractDiagram
+
+    def self.from_json: (String) -> AbstractDiagram
+
+    private
+
+    def self.deep_symbolize_keys: (Hash[string_symbol, untyped]) -> Hash[Symbol, untyped]
+  end
+
+  #  Errors
+  class ValidationError < StandardError
+  end
+
+  class EmptyDiagramError < ValidationError
+  end
+
+  class DuplicateLabelError < ValidationError
+  end
+end

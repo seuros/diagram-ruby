@@ -7,7 +7,7 @@ module Diagrams
     attribute :sections, Types::Array.of(Section).optional.default([].freeze)
 
     def type
-      :pie
+      'pie'
     end
 
     def validate!
@@ -41,8 +41,19 @@ module Diagrams
       end
     end
 
+    def to_json(*_args)
+      {
+        type:,
+        title:,
+        sections: sections.map(&:to_h)
+      }
+    end
+
     def valid?
       validate!
+      true
+    rescue ValidationError
+      false
     end
   end
 end

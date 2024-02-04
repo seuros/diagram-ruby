@@ -7,6 +7,14 @@ module Diagrams
       attribute :label, StateDiagram::Types::String.optional.default(nil)
       attribute :type,
                 StateDiagram::Types::String.optional.default('state').enum('state', 'start', 'end', 'fork', 'join')
+
+      def to_json(*_args)
+        {
+          id:,
+          label:,
+          type:
+        }
+      end
     end
   end
 end
