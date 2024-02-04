@@ -10,6 +10,16 @@ module Diagrams
       'pie'
     end
 
+    def add_section(*args)
+      section = Section.new(*args)
+      attributes[:sections] = attributes[:sections] + [section]
+      section
+    end
+
+    def remove_section(section_id)
+      attributes[:sections] = attributes[:sections].reject { |section| section.id == section_id }
+    end
+
     def validate!
       raise EmptyDiagramError, 'Pie diagram must have at least one section' if sections.empty?
 

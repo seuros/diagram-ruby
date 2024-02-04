@@ -39,10 +39,30 @@ module Diagrams
       assert_equal 'pie', PieDiagram.new({}).type
     end
 
+    def test_add_remove_section
+      diagram = PieDiagram.new({})
+      section = diagram.add_section(id: '1', label: 'Section 1', value: 30)
+
+      assert_equal 1, diagram.sections.size
+      assert_equal 'Section 1', diagram.sections.first.label
+      assert_equal 30, diagram.sections.first.value
+      assert_equal section, diagram.sections.first
+
+      diagram.remove_section('1')
+
+      assert_equal 0, diagram.sections.size
+    end
+
     private
 
     def create_sections
-      [{ label: 'Section 1', value: 30 }, { label: 'Section 2', value: 40 }]
+      [{
+        id: '1',
+        label: 'Section 1', value: 30
+      }, {
+        id: '2',
+        label: 'Section 2', value: 40
+      }]
     end
 
     def create_pie_diagram(sections)

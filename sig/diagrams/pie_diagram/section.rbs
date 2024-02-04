@@ -1,0 +1,7 @@
+module Diagrams
+  module PieDiagram
+    class Section
+      def to_json: -> untyped
+    end
+  end
+end
