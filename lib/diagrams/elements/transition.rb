@@ -4,12 +4,12 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents a transition between two states in a State Diagram.
     class Transition < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       # Consider if a transition needs its own ID.
       # attribute :id, Types::Strict::String

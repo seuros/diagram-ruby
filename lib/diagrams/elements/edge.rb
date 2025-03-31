@@ -4,13 +4,13 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents an edge or link between two nodes in a diagram.
     # Typically connects nodes via their IDs and can have an optional label.
     class Edge < Dry::Struct
       # Use the shared Types module defined in node.rb (or a dedicated types file)
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       # Consider if an edge needs its own ID, or if source/target/label is sufficient identity.
       # attribute :id, Types::Strict::String

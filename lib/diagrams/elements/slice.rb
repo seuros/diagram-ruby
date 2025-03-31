@@ -4,12 +4,12 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents a slice in a Pie Diagram.
     class Slice < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       attribute :label, Types::Strict::String.constrained(min_size: 1)
       # Represents the raw value of the slice (not percentage)

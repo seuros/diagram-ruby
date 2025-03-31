@@ -4,12 +4,12 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents an event, potentially used in State Diagrams or others.
     class Event < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       attribute :id, Types::Strict::String.constrained(min_size: 1)
       attribute :label, Types::Strict::String.optional.default(nil)

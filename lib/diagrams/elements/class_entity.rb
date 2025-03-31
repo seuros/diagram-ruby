@@ -4,12 +4,12 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents a class entity in a UML Class Diagram.
     class ClassEntity < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       # Name of the class
       attribute :name, Types::Strict::String.constrained(min_size: 1)

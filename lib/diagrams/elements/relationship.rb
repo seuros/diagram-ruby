@@ -4,13 +4,13 @@ require 'dry-struct'
 require_relative 'node' # Load Types module defined in node.rb
 
 module Diagrams
-  # Corrected namespace
+
   module Elements
     # Represents a relationship (e.g., association, inheritance) between two classes
     # in a UML Class Diagram.
     class Relationship < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       # Name of the source class
       attribute :source_class_name, Types::Strict::String.constrained(min_size: 1)

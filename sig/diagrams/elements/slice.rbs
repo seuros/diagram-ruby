@@ -1,7 +1,7 @@
 module Diagrams
-  module Elements # Corrected namespace
+  module Elements
     class Slice < ::Dry::Struct
-      include Diagrams::Elements::Types # Corrected namespace
+      include Diagrams::Elements::Types
 
       # Attributes
       def label: () -> ::String

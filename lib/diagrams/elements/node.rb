@@ -5,7 +5,7 @@ require 'dry-types'
 
 module Diagrams
   # Namespace for diagram element value objects.
-  # Corrected namespace
+
   module Elements
     # Common Dry::Types definitions for elements.
     module Types
@@ -16,7 +16,7 @@ module Diagrams
     # Typically has an identifier and a display label.
     class Node < Dry::Struct
       # Use the shared Types module
-      include Elements::Types # Corrected namespace
+      include Elements::Types
 
       attribute :id, Types::Strict::String.constrained(min_size: 1)
       attribute :label, Types::Strict::String.constrained(min_size: 1)

@@ -1,7 +1,7 @@
 # Signatures for the shared Dry::Types module used by elements.
 # Note: Dry::Types integration with RBS can be complex. This is a basic representation.
 module Diagrams
-  module Elements # Corrected namespace
+  module Elements
     module Types
       # Define common types used in elements if needed, or rely on Dry::Types inference.
       # Example:
