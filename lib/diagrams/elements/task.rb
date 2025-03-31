@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-require 'dry-struct'
-require_relative 'node' # Load Types module defined in node.rb
-
 module Diagrams
-
   module Elements
     # Represents a task in a Gantt Diagram.
     class Task < Dry::Struct

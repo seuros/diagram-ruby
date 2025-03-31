@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base'
-require_relative 'elements/class_entity'
-require_relative 'elements/relationship'
-
 module Diagrams
   # Represents a UML Class Diagram consisting of classes and relationships between them.
   class ClassDiagram < Base

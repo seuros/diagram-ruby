@@ -137,7 +137,5 @@ module Diagrams
       # assert_empty diagram1.diff(diagram2)
       skip 'Need another concrete diagram type to test diff across types.'
     end
-
-    # Add more tests for modified elements later if diff logic is enhanced.
   end
 end

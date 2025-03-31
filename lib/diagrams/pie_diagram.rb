@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base'
-require_relative 'elements/slice'
-
 module Diagrams
   # Represents a Pie Chart diagram consisting of slices.
   class PieDiagram < Base

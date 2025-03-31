@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base'
-require_relative 'elements/node'
-require_relative 'elements/edge'
-
 module Diagrams
   # Represents a flowchart diagram consisting of nodes and edges connecting them.
   class FlowchartDiagram < Base
@@ -28,7 +24,6 @@ module Diagrams
     # @raise [ArgumentError] if a node with the same ID already exists.
     # @return [Element::Node] The added node.
     def add_node(node)
-
       raise ArgumentError, 'Node must be a Diagrams::Element::Node' unless node.is_a?(Diagrams::Elements::Node)
       raise ArgumentError, "Node with ID '#{node.id}' already exists" if find_node(node.id)
 
@@ -43,7 +38,6 @@ module Diagrams
     # @raise [ArgumentError] if the edge refers to non-existent node IDs.
     # @return [Element::Edge] The added edge.
     def add_edge(edge)
-
       raise ArgumentError, 'Edge must be a Diagrams::Element::Edge' unless edge.is_a?(Diagrams::Elements::Edge)
       unless find_node(edge.source_id) && find_node(edge.target_id)
         raise ArgumentError, "Edge refers to non-existent node IDs ('#{edge.source_id}' or '#{edge.target_id}')"

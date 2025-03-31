@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base'
-require_relative 'elements/task'
-
 module Diagrams
   # Represents a Gantt Chart diagram consisting of tasks over time.
   class GanttDiagram < Base

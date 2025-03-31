@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-require 'dry-struct'
-require_relative 'node' # Load Types module defined in node.rb
-
 module Diagrams
-
   module Elements
     # Represents an edge or link between two nodes in a diagram.
     # Typically connects nodes via their IDs and can have an optional label.

@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-require 'dry-struct'
-require_relative 'node' # Load Types module defined in node.rb
-
 module Diagrams
-
   module Elements
     # Represents a relationship (e.g., association, inheritance) between two classes
     # in a UML Class Diagram.

@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'digest'
-require 'json'
-require 'dry-equalizer'
-
 module Diagrams
   # Abstract base class for all diagram types.
   # Provides common functionality like versioning, checksum calculation,

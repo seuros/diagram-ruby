@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'base'
-require_relative 'elements/state'
-require_relative 'elements/transition'
-require_relative 'elements/event' # Assuming events are still desired
-
 module Diagrams
   # Represents a State Diagram consisting of states and transitions between them.
   class StateDiagram < Base

@@ -1,17 +1,9 @@
 # frozen_string_literal: true
 
-require 'dry-struct'
-require 'dry-types'
-
 module Diagrams
   # Namespace for diagram element value objects.
 
   module Elements
-    # Common Dry::Types definitions for elements.
-    module Types
-      include Dry.Types()
-    end
-
     # Represents a node in various diagram types (e.g., Flowchart).
     # Typically has an identifier and a display label.
     class Node < Dry::Struct
