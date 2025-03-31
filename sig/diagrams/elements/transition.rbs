@@ -1,0 +1,18 @@
+require 'dry-struct'
+require_relative 'types'
+
+module Diagrams
+  module Elements # Corrected namespace
+    class Transition < ::Dry::Struct
+      include Diagrams::Elements::Types # Corrected namespace
+
+      # Attributes
+      def source_state_id: () -> ::String
+      def target_state_id: () -> ::String
+      def label: () -> ::String?
+
+      # Methods
+      def to_h: () -> { source_state_id: ::String, target_state_id: ::String, ?label: ::String }
+    end
+  end
+end

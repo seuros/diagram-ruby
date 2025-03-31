@@ -1,7 +1,29 @@
-module Diagrams
-  class GanttDiagram < AbstractDiagram
-    def type: () -> "gantt"
+require_relative 'base'
+require_relative 'elements/task'
 
-    def to_json: (*untyped _args) -> { title: String, sections: untyped }
+module Diagrams
+  class GanttDiagram < Base
+    attr_reader title: ::String
+    attr_reader tasks: ::Array[Elements::Task]
+
+    # Initializes a new GanttDiagram.
+    def initialize: (?title: ::String?, ?tasks: ::Array[Elements::Task]?, ?version: Integer | String?) -> void
+
+    # Adds a task to the diagram.
+    def add_task: (Elements::Task task) -> Elements::Task
+
+    # Finds a task by its ID.
+    def find_task: (::String task_id) -> Elements::Task?
+
+    # Returns the specific content of the Gantt diagram as a hash.
+    def to_h_content: () -> { title: ::String, tasks: ::Array[Hash[Symbol, untyped]] }
+
+    # Class method to create a GanttDiagram from a hash.
+    def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> GanttDiagram
+
+    private
+
+    # Validates the consistency of tasks during initialization.
+    def validate_elements!: () -> void
   end
 end

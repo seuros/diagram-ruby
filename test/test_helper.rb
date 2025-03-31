@@ -7,7 +7,7 @@ require 'minitest/autorun'
 
 class DiagramTest < Minitest::Test
   def subject
-    self.class.name.gsub(/Test$/, '').constantize
+    Object.const_get(self.class.name.gsub(/Test$/, ''))
   end
 
   def test_class_methods

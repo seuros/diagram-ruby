@@ -3,7 +3,7 @@ require:
   - rubocop-performance
   - rubocop-rake
 AllCops:
-  TargetRubyVersion: 3.1
+  TargetRubyVersion: 3.3
   NewCops: enable
 
 Style/Documentation:
@@ -17,3 +17,10 @@ Metrics/AbcSize:
 
 Minitest/MultipleAssertions:
   Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+Metrics/ClassLength:
+  Exclude:
+    - 'test/**/*' # Allow longer test classes

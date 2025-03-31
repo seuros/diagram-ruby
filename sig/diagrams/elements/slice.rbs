@@ -1,0 +1,17 @@
+require 'dry-struct'
+require_relative 'types'
+
+module Diagrams
+  module Elements # Corrected namespace
+    class Slice < ::Dry::Struct
+      include Diagrams::Elements::Types # Corrected namespace
+
+      # Attributes
+      def label: () -> ::String
+      def value: () -> ::Float
+
+      # Methods
+      def to_h: () -> { label: ::String, value: ::Float }
+    end
+  end
+end

@@ -1,0 +1,33 @@
+require_relative 'base'
+require_relative 'elements/node'
+require_relative 'elements/edge'
+
+module Diagrams
+  class FlowchartDiagram < Base
+    attr_reader nodes: ::Array[Element::Node]
+    attr_reader edges: ::Array[Element::Edge]
+
+    # Initializes a new FlowchartDiagram.
+    def initialize: (?nodes: ::Array[Element::Node]?, ?edges: ::Array[Element::Edge]?, ?version: Integer | String?) -> void
+
+    # Adds a node to the diagram.
+    def add_node: (Element::Node node) -> Element::Node
+
+    # Adds an edge to the diagram.
+    def add_edge: (Element::Edge edge) -> Element::Edge
+
+    # Finds a node by its ID.
+    def find_node: (::String node_id) -> Element::Node?
+
+    # Returns the specific content of the flowchart diagram as a hash.
+    def to_h_content: () -> { nodes: ::Array[Hash[Symbol, untyped]], edges: ::Array[Hash[Symbol, untyped]] }
+
+    # Class method to create a FlowchartDiagram from a hash.
+    def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> FlowchartDiagram
+
+    private
+
+    # Validates the consistency of nodes and edges during initialization.
+    def validate_elements!: () -> void
+  end
+end

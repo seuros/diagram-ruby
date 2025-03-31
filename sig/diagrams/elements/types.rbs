@@ -1,0 +1,20 @@
+# Signatures for the shared Dry::Types module used by elements.
+# Note: Dry::Types integration with RBS can be complex. This is a basic representation.
+require 'dry-types'
+
+module Diagrams
+  module Elements # Corrected namespace
+    module Types
+      # Define common types used in elements if needed, or rely on Dry::Types inference.
+      # Example:
+      # type StrictString = ::String
+      # type StrictFloat = ::Float
+      # type StrictArray[T] = ::Array[T]
+      # type String? = StrictString?
+      # ... etc ...
+
+      # Include the Dry::Types module interface (basic representation)
+      include ::Dry::Types
+    end
+  end
+end
