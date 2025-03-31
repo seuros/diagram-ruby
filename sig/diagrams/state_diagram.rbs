@@ -1,8 +1,3 @@
-require_relative 'base'
-require_relative 'elements/state'
-require_relative 'elements/transition'
-require_relative 'elements/event'
-
 module Diagrams
   class StateDiagram < Base
     attr_reader title: ::String
@@ -30,6 +25,9 @@ module Diagrams
 
     # Returns the specific content of the state diagram as a hash.
     def to_h_content: () -> { title: ::String, states: ::Array[Hash[Symbol, untyped]], transitions: ::Array[Hash[Symbol, untyped]], events: ::Array[Hash[Symbol, untyped]] }
+
+    # Returns a hash mapping element types to their collections for diffing.
+    def identifiable_elements: () -> { states: ::Array[Elements::State], transitions: ::Array[Elements::Transition], events: ::Array[Elements::Event] }
 
     # Class method to create a StateDiagram from a hash.
     def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> StateDiagram

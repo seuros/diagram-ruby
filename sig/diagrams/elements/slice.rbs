@@ -1,6 +1,3 @@
-require 'dry-struct'
-require_relative 'types'
-
 module Diagrams
   module Elements # Corrected namespace
     class Slice < ::Dry::Struct

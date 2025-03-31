@@ -31,14 +31,12 @@ module Diagrams
     end
 
     def test_initialize_validates_duplicate_node_id
-      # Removed regex message check to simplify and avoid potential TypeError
       assert_raises(ArgumentError) do
         FlowchartDiagram.new(nodes: [@node1, @node1])
       end
     end
 
     def test_initialize_validates_edge_nodes
-      # Removed regex message check to simplify and avoid potential TypeError
       assert_raises(ArgumentError) do
         FlowchartDiagram.new(nodes: [@node1], edges: [@edge1]) # edge1 needs n2
       end
@@ -50,12 +48,11 @@ module Diagrams
       diagram.add_node(@node1)
 
       assert_equal [@node1], diagram.nodes
-      refute_equal initial_checksum, diagram.checksum # Use Minitest's refute_equal
+      refute_equal initial_checksum, diagram.checksum
     end
 
     def test_add_node_duplicate_id
       diagram = FlowchartDiagram.new(nodes: [@node1])
-      # Removed regex message check to simplify and avoid potential TypeError
       assert_raises(ArgumentError) do
         diagram.add_node(@node1)
       end
@@ -67,12 +64,11 @@ module Diagrams
       diagram.add_edge(@edge1)
 
       assert_equal [@edge1], diagram.edges
-      refute_equal initial_checksum, diagram.checksum # Use Minitest's refute_equal
+      refute_equal initial_checksum, diagram.checksum
     end
 
     def test_add_edge_invalid_node
       diagram = FlowchartDiagram.new(nodes: [@node1]) # Missing node n2
-      # Removed regex message check to simplify and avoid potential TypeError
       assert_raises(ArgumentError) do
         diagram.add_edge(@edge1)
       end
@@ -98,7 +94,7 @@ module Diagrams
     def test_to_h
       diagram = FlowchartDiagram.new(nodes: [@node1], edges: [], version: 3)
       expected = {
-        type: 'FlowchartDiagram',
+        type: 'flowchart_diagram',
         version: 3,
         checksum: diagram.checksum,
         data: {

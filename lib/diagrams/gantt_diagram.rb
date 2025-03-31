@@ -54,6 +54,15 @@ module Diagrams
       }
     end
 
+    # Returns a hash mapping element types to their collections for diffing.
+    # @see Diagrams::Base#identifiable_elements
+    # @return [Hash{Symbol => Array<Diagrams::Elements::Task>}]
+    def identifiable_elements
+      {
+        tasks: @tasks
+      }
+    end
+
     # Class method to create a GanttDiagram from a hash.
     # Used by the deserialization factory in `Diagrams::Base`.
     #

@@ -1,7 +1,3 @@
-require_relative 'base'
-require_relative 'elements/node'
-require_relative 'elements/edge'
-
 module Diagrams
   class FlowchartDiagram < Base
     attr_reader nodes: ::Array[Element::Node]
@@ -21,6 +17,9 @@ module Diagrams
 
     # Returns the specific content of the flowchart diagram as a hash.
     def to_h_content: () -> { nodes: ::Array[Hash[Symbol, untyped]], edges: ::Array[Hash[Symbol, untyped]] }
+
+    # Returns a hash mapping element types to their collections for diffing.
+    def identifiable_elements: () -> { nodes: ::Array[Elements::Node], edges: ::Array[Elements::Edge] }
 
     # Class method to create a FlowchartDiagram from a hash.
     def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> FlowchartDiagram

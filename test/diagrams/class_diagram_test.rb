@@ -100,7 +100,7 @@ module Diagrams
     def test_to_h
       diagram = ClassDiagram.new(classes: [@class1], relationships: [], version: 5)
       expected = {
-        type: 'ClassDiagram',
+        type: 'class_diagram',
         version: 5,
         checksum: diagram.checksum,
         data: {
