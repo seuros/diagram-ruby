@@ -1,7 +1,42 @@
-module Diagrams
-  class StateDiagram < AbstractDiagram
-    def type: () -> "state_machine"
+require_relative 'base'
+require_relative 'elements/state'
+require_relative 'elements/transition'
+require_relative 'elements/event'
 
-    def to_json: (*untyped _args) -> { id: String, states: untyped, transitions: untyped, events: untyped }
+module Diagrams
+  class StateDiagram < Base
+    attr_reader title: ::String
+    attr_reader states: ::Array[Elements::State]
+    attr_reader transitions: ::Array[Elements::Transition]
+    attr_reader events: ::Array[Elements::Event]
+
+    # Initializes a new StateDiagram.
+    def initialize: (?title: ::String?, ?states: ::Array[Elements::State]?, ?transitions: ::Array[Elements::Transition]?, ?events: ::Array[Elements::Event]?, ?version: Integer | String?) -> void
+
+    # Adds a state to the diagram.
+    def add_state: (Elements::State state) -> Elements::State
+
+    # Adds a transition to the diagram.
+    def add_transition: (Elements::Transition transition) -> Elements::Transition
+
+    # Adds an event to the diagram.
+    def add_event: (Elements::Event event) -> Elements::Event
+
+    # Finds a state by its ID.
+    def find_state: (::String state_id) -> Elements::State?
+
+    # Finds an event by its ID.
+    def find_event: (::String event_id) -> Elements::Event?
+
+    # Returns the specific content of the state diagram as a hash.
+    def to_h_content: () -> { title: ::String, states: ::Array[Hash[Symbol, untyped]], transitions: ::Array[Hash[Symbol, untyped]], events: ::Array[Hash[Symbol, untyped]] }
+
+    # Class method to create a StateDiagram from a hash.
+    def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> StateDiagram
+
+    private
+
+    # Validates the consistency of elements during initialization.
+    def validate_elements!: () -> void
   end
 end

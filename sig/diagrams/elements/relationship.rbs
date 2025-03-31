@@ -1,0 +1,19 @@
+require 'dry-struct'
+require_relative 'types'
+
+module Diagrams
+  module Elements # Corrected namespace
+    class Relationship < ::Dry::Struct
+      include Diagrams::Elements::Types # Corrected namespace
+
+      # Attributes
+      def source_class_name: () -> ::String
+      def target_class_name: () -> ::String
+      def type: () -> ::String
+      def label: () -> ::String?
+
+      # Methods
+      def to_h: () -> { source_class_name: ::String, target_class_name: ::String, type: ::String, ?label: ::String }
+    end
+  end
+end

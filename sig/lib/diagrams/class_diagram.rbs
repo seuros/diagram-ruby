@@ -1,7 +1,33 @@
-module Diagrams
-  class ClassDiagram < AbstractDiagram
-    def type: () -> "classes"
+require_relative 'base'
+require_relative 'elements/class_entity'
+require_relative 'elements/relationship'
 
-    def to_json: (*untyped _args) -> { id: untyped, classes: untyped }
+module Diagrams
+  class ClassDiagram < Base
+    attr_reader classes: ::Array[Elements::ClassEntity]
+    attr_reader relationships: ::Array[Elements::Relationship]
+
+    # Initializes a new ClassDiagram.
+    def initialize: (?classes: ::Array[Elements::ClassEntity]?, ?relationships: ::Array[Elements::Relationship]?, ?version: Integer | String?) -> void
+
+    # Adds a class entity to the diagram.
+    def add_class: (Elements::ClassEntity class_entity) -> Elements::ClassEntity
+
+    # Adds a relationship to the diagram.
+    def add_relationship: (Elements::Relationship relationship) -> Elements::Relationship
+
+    # Finds a class entity by its name.
+    def find_class: (::String class_name) -> Elements::ClassEntity?
+
+    # Returns the specific content of the class diagram as a hash.
+    def to_h_content: () -> { classes: ::Array[Hash[Symbol, untyped]], relationships: ::Array[Hash[Symbol, untyped]] }
+
+    # Class method to create a ClassDiagram from a hash.
+    def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> ClassDiagram
+
+    private
+
+    # Validates the consistency of classes and relationships during initialization.
+    def validate_elements!: () -> void
   end
 end

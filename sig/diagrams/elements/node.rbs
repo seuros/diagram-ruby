@@ -1,0 +1,17 @@
+require 'dry-struct'
+require_relative 'types' # Include the shared types module signature
+
+module Diagrams
+  module Elements # Corrected namespace
+    class Node < ::Dry::Struct
+      include Diagrams::Elements::Types # Corrected namespace
+
+      # Attributes
+      def id: () -> ::String
+      def label: () -> ::String
+
+      # Methods
+      def to_h: () -> { id: ::String, label: ::String }
+    end
+  end
+end
