@@ -78,6 +78,16 @@ module Diagrams
       }
     end
 
+    # Returns a hash mapping element types to their collections for diffing.
+    # @see Diagrams::Base#identifiable_elements
+    # @return [Hash{Symbol => Array<Diagrams::Elements::ClassEntity | Diagrams::Elements::Relationship>}]
+    def identifiable_elements
+      {
+        classes: @classes,
+        relationships: @relationships
+      }
+    end
+
     # Class method to create a ClassDiagram from a hash.
     # Used by the deserialization factory in `Diagrams::Base`.
     #
@@ -96,7 +106,6 @@ module Diagrams
 
       diagram = new(classes:, relationships:, version:)
 
-      # Optional: Verify checksum if provided
       if checksum && diagram.checksum != checksum
         warn "Checksum mismatch for loaded ClassDiagram (version: #{version}). Expected #{checksum}, got #{diagram.checksum}."
         # Or raise an error: raise "Checksum mismatch..."

@@ -35,6 +35,87 @@ module Diagrams
       raise NotImplementedError, "#{self.class.name} must implement #to_h_content"
     end
 
+    # Abstract method: Subclasses must implement this to return a hash
+    # mapping element type symbols (e.g., :nodes, :edges) to arrays
+    # of the corresponding element objects within the diagram.
+    # Used for comparison and diffing.
+    #
+    # @return [Hash{Symbol => Array<Diagrams::Elements::*>}]
+    def identifiable_elements
+      raise NotImplementedError, "#{self.class.name} must implement #identifiable_elements"
+    end
+
+    # Performs a basic diff against another diagram object.
+    # Only compares diagrams of the same type.
+    # Identifies added and removed elements based on common identifiers (id/name) or object equality.
+    # Does NOT currently detect modified elements.
+    #
+    # @param other [Diagrams::Base] The diagram to compare against.
+    # @return [Hash{Symbol => Hash{Symbol => Array<Diagrams::Elements::*>}}] A hash describing differences,
+    #   e.g., { nodes: { added: [...], removed: [...] }, edges: { added: [...], removed: [...] } }
+    #   Returns an empty hash if diagrams are identical or of different types.
+    def diff(other)
+      diff_result = {}
+      return diff_result unless other.is_a?(self.class) # Only compare same types
+      return diff_result if self == other # Use existing equality check for quick exit
+
+      self_elements = identifiable_elements
+      other_elements = other.identifiable_elements
+
+      # Ensure both diagrams define the same element types for comparison
+      element_types = self_elements.keys & other_elements.keys
+
+      element_types.each do |type|
+        self_collection = self_elements[type] || []
+        other_collection = other_elements[type] || []
+
+        # Determine identifier method (prefer id, then name, fallback to object itself)
+        identifier_method = if self_collection.first.respond_to?(:id)
+                              :id
+                            elsif self_collection.first.respond_to?(:name)
+                              :name
+                            elsif self_collection.first.respond_to?(:label) # For Slice
+                              :label
+                            else
+                              :itself # Fallback to object identity/equality
+                            end
+
+        self_ids = self_collection.map(&identifier_method)
+        other_ids = other_collection.map(&identifier_method)
+
+        added_ids = other_ids - self_ids
+        removed_ids = self_ids - other_ids
+
+        added_elements = other_collection.select { |el| added_ids.include?(el.send(identifier_method)) }
+        removed_elements = self_collection.select { |el| removed_ids.include?(el.send(identifier_method)) }
+
+        # Basic check for modified elements (same ID, different content via checksum/hash if available, or simple !=)
+        # This is a very basic modification check
+        potential_modified_ids = self_ids & other_ids
+        modified_elements = []
+        potential_modified_ids.each do |id|
+          self_el = self_collection.find { |el| el.send(identifier_method) == id }
+          other_el = other_collection.find { |el| el.send(identifier_method) == id }
+          # Use Dry::Struct equality if available, otherwise basic !=
+          next unless self_el != other_el
+
+          modified_elements << { old: self_el, new: other_el }
+          # Remove from added/removed if detected as modified
+          added_elements.delete(other_el)
+          removed_elements.delete(self_el)
+        end
+
+        type_diff = {}
+        type_diff[:added] = added_elements if added_elements.any?
+        type_diff[:removed] = removed_elements if removed_elements.any?
+        type_diff[:modified] = modified_elements if modified_elements.any? # Add modified info
+
+        diff_result[type] = type_diff if type_diff.any?
+      end
+
+      diff_result
+    end
+
     # Returns a hash representation of the diagram, suitable for serialization.
     # Includes common metadata and calls `#to_h_content` for specific data.
     #
@@ -42,7 +123,8 @@ module Diagrams
     def to_h
       {
         # Extract class name without module prefix (e.g., "FlowchartDiagram")
-        type: self.class.name.split('::').last,
+        # Convert class name to snake_case (e.g., FlowchartDiagram -> flowchart_diagram)
+        type: camel_to_snake_case(self.class.name.split('::').last),
         version: @version,
         checksum: @checksum, # Ensure checksum is up-to-date before calling
         data: to_h_content
@@ -82,8 +164,10 @@ module Diagrams
         checksum = symbolized_hash[:checksum] # Pass checksum for potential verification
 
         begin
+          # Convert snake_case type string back to CamelCase class name part
+          camel_case_type = snake_to_camel_case(type_string)
           # Construct full class name (e.g., "Diagrams::FlowchartDiagram")
-          klass_name = "Diagrams::#{type_string}"
+          klass_name = "Diagrams::#{camel_case_type}"
           klass = Object.const_get(klass_name)
         rescue NameError
           raise NameError, "Unknown diagram type '#{type_string}' corresponding to class '#{klass_name}'"
@@ -108,6 +192,14 @@ module Diagrams
       rescue JSON::ParserError => e
         raise JSON::ParserError, "Failed to parse JSON: #{e.message}"
       end
+
+      private # Make helper private to the class methods
+
+      # Simple helper to convert snake_case to CamelCase
+      # (Avoids ActiveSupport dependency)
+      def snake_to_camel_case(string)
+        string.split('_').collect(&:capitalize).join
+      end
     end
 
     # --- End Deserialization Methods ---
@@ -121,7 +213,15 @@ module Diagrams
       @checksum = compute_checksum
     end
 
-    private
+    # Simple helper to convert CamelCase to snake_case
+    # (Avoids ActiveSupport dependency)
+    def camel_to_snake_case(string)
+      string.gsub('::', '/')
+            .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+            .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+            .tr('-', '_')
+            .downcase
+    end
 
     # Computes the SHA256 checksum of the diagram's content.
     # The content is obtained from `#to_h_content` and serialized to JSON

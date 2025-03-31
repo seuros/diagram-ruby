@@ -1,6 +1,3 @@
-require_relative 'base'
-require_relative 'elements/slice'
-
 module Diagrams
   class PieDiagram < Base
     attr_reader title: ::String
@@ -10,16 +7,20 @@ module Diagrams
     def initialize: (?title: ::String?, ?slices: ::Array[Elements::Slice]?, ?version: Integer | String?) -> void
 
     # Adds a slice to the diagram.
-    def add_slice: (Elements::Slice slice) -> Elements::Slice
+    # Note: update_checksum and initial_load are internal flags.
+    def add_slice: (Elements::Slice slice, ?update_checksum: bool, ?initial_load: bool) -> Elements::Slice
 
     # Finds a slice by its label.
     def find_slice: (::String label) -> Elements::Slice?
 
-    # Calculates the current total percentage of all slices.
-    def current_total: () -> ::Float
+    # Calculates the total raw value of all slices.
+    def total_value: () -> ::Float
 
     # Returns the specific content of the pie diagram as a hash.
     def to_h_content: () -> { title: ::String, slices: ::Array[Hash[Symbol, untyped]] }
+
+    # Returns a hash mapping element types to their collections for diffing.
+    def identifiable_elements: () -> { slices: ::Array[Elements::Slice] }
 
     # Class method to create a PieDiagram from a hash.
     def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> PieDiagram
@@ -28,5 +29,8 @@ module Diagrams
 
     # Validates the consistency of slices during initialization.
     def validate_elements!: () -> void
+
+    # Recalculates the percentage for each slice based on the total value.
+    def recalculate_percentages!: () -> void
   end
 end

@@ -14,28 +14,32 @@ module Diagrams
     # @param slices [Array<Element::Slice>] An array of slice objects.
     # @param version [String, Integer, nil] User-defined version identifier.
     def initialize(title: '', slices: [], version: 1)
-      super(version:)
+      super(version: version) # Corrected super call
       @title = title.is_a?(String) ? title : ''
-      @slices = slices.is_a?(Array) ? slices : []
-      validate_elements!
-      update_checksum!
+      @slices = [] # Initialize empty
+      # Add initial slices using the corrected add_slice method
+      (slices.is_a?(Array) ? slices : []).each { |s| add_slice(s, update_checksum: false, initial_load: true) }
+      recalculate_percentages! # Calculate initial percentages
+      update_checksum! # Calculate final checksum after initial load
     end
 
     # Adds a slice to the diagram.
     #
     # @param slice [Element::Slice] The slice object to add.
-    # @raise [ArgumentError] if a slice with the same label already exists or if adding the slice exceeds 100%.
+    # @raise [ArgumentError] if a slice with the same label already exists.
     # @return [Element::Slice] The added slice.
-    def add_slice(slice)
+    # Added initial_load flag to skip checksum update during initialize loop
+    def add_slice(slice, update_checksum: true, initial_load: false)
       raise ArgumentError, 'Slice must be a Diagrams::Elements::Slice' unless slice.is_a?(Diagrams::Elements::Slice)
       raise ArgumentError, "Slice with label '#{slice.label}' already exists" if find_slice(slice.label)
-      if (current_total + slice.value) > 100.0 + Float::EPSILON # Allow for minor float inaccuracies
-        raise ArgumentError, "Adding slice '#{slice.label}' with value #{slice.value} exceeds 100%"
-      end
 
-      @slices << slice
-      update_checksum!
-      slice
+      # Store a new instance to hold the calculated percentage later
+      # Ensure percentage is nil initially
+      new_slice_instance = slice.class.new(slice.attributes.except(:percentage))
+      @slices << new_slice_instance
+      recalculate_percentages! # Update percentages for all slices
+      update_checksum! if update_checksum && !initial_load # Avoid multiple checksums during init
+      new_slice_instance # Return the instance added to the array
     end
 
     # Finds a slice by its label.
@@ -46,9 +50,9 @@ module Diagrams
       @slices.find { |s| s.label == label }
     end
 
-    # Calculates the current total percentage of all slices.
+    # Calculates the total raw value of all slices.
     # @return [Float]
-    def current_total
+    def total_value
       @slices.sum(&:value)
     end
 
@@ -59,7 +63,17 @@ module Diagrams
     def to_h_content
       {
         title: @title,
+        # Ensure slices include calculated percentage in their hash
         slices: @slices.map(&:to_h)
+      }
+    end
+
+    # Returns a hash mapping element types to their collections for diffing.
+    # @see Diagrams::Base#identifiable_elements
+    # @return [Hash{Symbol => Array<Diagrams::Elements::Slice>}]
+    def identifiable_elements
+      {
+        slices: @slices
       }
     end
 
@@ -74,11 +88,14 @@ module Diagrams
       title = data_hash[:title] || data_hash['title'] || ''
       slices_data = data_hash[:slices] || data_hash['slices'] || []
 
-      slices = slices_data.map { |slice_h| Diagrams::Elements::Slice.new(slice_h.transform_keys(&:to_sym)) }
+      # Initialize with raw values, percentage will be recalculated by `new` -> `add_slice` -> `recalculate_percentages!`
+      slices = slices_data.map do |slice_h|
+        Diagrams::Elements::Slice.new(slice_h.transform_keys(&:to_sym).except(:percentage))
+      end
 
-      diagram = new(title:, slices:, version:)
+      diagram = new(title: title, slices: slices, version: version)
 
-      # Optional: Verify checksum if provided
+      # Optional: Verify checksum if provided AFTER initialization is complete
       if checksum && diagram.checksum != checksum
         warn "Checksum mismatch for loaded PieDiagram (version: #{version}). Expected #{checksum}, got #{diagram.checksum}."
         # Or raise an error: raise "Checksum mismatch..."
@@ -89,15 +106,25 @@ module Diagrams
 
     private
 
+    # Recalculates the percentage for each slice based on the total value.
+    # This method modifies the @slices array in place by replacing Slice instances.
+    def recalculate_percentages!
+      total = total_value
+      new_slices = @slices.map do |slice|
+        percentage = total.zero? ? 0.0 : (slice.value / total * 100.0).round(2)
+        # Create a new instance with the calculated percentage
+        slice.class.new(slice.attributes.merge(percentage: percentage))
+      end
+      # Replace the entire array to ensure changes are reflected
+      @slices = new_slices
+    end
+
     # Validates the consistency of slices during initialization.
     def validate_elements!
       labels = @slices.map(&:label)
-      raise ArgumentError, 'Duplicate slice labels found' unless labels.uniq.size == @slices.size
+      return if labels.uniq.size == @slices.size
 
-      total = current_total
-      return unless total > 100.0 + Float::EPSILON # Allow for minor float inaccuracies
-
-      raise ArgumentError, "Initial slice values exceed 100% (total: #{total}%)"
+      raise ArgumentError, 'Duplicate slice labels found'
     end
   end
 end

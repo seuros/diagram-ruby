@@ -73,6 +73,16 @@ module Diagrams
       }
     end
 
+    # Returns a hash mapping element types to their collections for diffing.
+    # @see Diagrams::Base#identifiable_elements
+    # @return [Hash{Symbol => Array<Diagrams::Elements::Node | Diagrams::Elements::Edge>}]
+    def identifiable_elements
+      {
+        nodes: @nodes,
+        edges: @edges
+      }
+    end
+
     # Class method to create a FlowchartDiagram from a hash.
     # Used by the deserialization factory in `Diagrams::Base`.
     #

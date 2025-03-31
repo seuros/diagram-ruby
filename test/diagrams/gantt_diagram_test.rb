@@ -71,7 +71,7 @@ module Diagrams
     def test_to_h
       diagram = GanttDiagram.new(title: 'Plan v4', tasks: [@task1], version: 4)
       expected = {
-        type: 'GanttDiagram',
+        type: 'gantt_diagram',
         version: 4,
         checksum: diagram.checksum,
         data: {

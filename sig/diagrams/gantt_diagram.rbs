@@ -1,6 +1,3 @@
-require_relative 'base'
-require_relative 'elements/task'
-
 module Diagrams
   class GanttDiagram < Base
     attr_reader title: ::String
@@ -17,6 +14,9 @@ module Diagrams
 
     # Returns the specific content of the Gantt diagram as a hash.
     def to_h_content: () -> { title: ::String, tasks: ::Array[Hash[Symbol, untyped]] }
+
+    # Returns a hash mapping element types to their collections for diffing.
+    def identifiable_elements: () -> { tasks: ::Array[Elements::Task] }
 
     # Class method to create a GanttDiagram from a hash.
     def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> GanttDiagram

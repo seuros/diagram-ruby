@@ -1,7 +1,8 @@
 require:
   - rubocop-minitest
-  - rubocop-performance
   - rubocop-rake
+plugins:  
+  - rubocop-performance
 AllCops:
   TargetRubyVersion: 3.3
   NewCops: enable

@@ -137,7 +137,7 @@ module Diagrams
     def test_to_h
       diagram = StateDiagram.new(title: 'State v9', states: [@state1], version: 9)
       expected = {
-        type: 'StateDiagram',
+        type: 'state_diagram',
         version: 9,
         checksum: diagram.checksum,
         data: {

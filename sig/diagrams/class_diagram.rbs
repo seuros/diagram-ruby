@@ -1,6 +1,3 @@
-require_relative 'base'
-require_relative 'elements/class_entity'
-require_relative 'elements/relationship'
 
 module Diagrams
   class ClassDiagram < Base
@@ -21,6 +18,9 @@ module Diagrams
 
     # Returns the specific content of the class diagram as a hash.
     def to_h_content: () -> { classes: ::Array[Hash[Symbol, untyped]], relationships: ::Array[Hash[Symbol, untyped]] }
+
+    # Returns a hash mapping element types to their collections for diffing.
+    def identifiable_elements: () -> { classes: ::Array[Elements::ClassEntity], relationships: ::Array[Elements::Relationship] }
 
     # Class method to create a ClassDiagram from a hash.
     def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> ClassDiagram

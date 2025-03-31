@@ -104,6 +104,17 @@ module Diagrams
       }
     end
 
+    # Returns a hash mapping element types to their collections for diffing.
+    # @see Diagrams::Base#identifiable_elements
+    # @return [Hash{Symbol => Array<Diagrams::Elements::State | Diagrams::Elements::Transition | Diagrams::Elements::Event>}]
+    def identifiable_elements
+      {
+        states: @states,
+        transitions: @transitions,
+        events: @events
+      }
+    end
+
     # Class method to create a StateDiagram from a hash.
     # Used by the deserialization factory in `Diagrams::Base`.
     #

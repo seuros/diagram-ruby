@@ -1,6 +1,3 @@
-require 'dry-equalizer'
-require 'json'
-
 module Diagrams
   # Abstract base class for all diagram types.
   # Provides common functionality like versioning, checksum calculation,
@@ -24,6 +21,13 @@ module Diagrams
     # representing their specific content, suitable for serialization.
     # @return [Hash[Symbol, untyped]]
     def to_h_content: () -> Hash[Symbol, untyped]
+
+    # Abstract method: Subclasses must implement this to return a hash
+    # mapping element type symbols (e.g., :nodes, :edges) to arrays
+    # of the corresponding element objects within the diagram.
+    # Used for comparison and diffing.
+    # @return [Hash[Symbol, Array[untyped]]] # More specific types in subclasses
+    def identifiable_elements: () -> Hash[Symbol, Array[untyped]]
 
     # Returns a hash representation of the diagram, suitable for serialization.
     # Includes common metadata and calls `#to_h_content` for specific data.
@@ -50,9 +54,12 @@ module Diagrams
     # @return [Diagrams::Base] An instance of the specific diagram subclass.
     def self.from_json: (String json_string) -> Diagrams::Base
 
-    # --- End Deserialization Methods ---
+    # Performs a basic diff against another diagram object.
+    # @param other [Diagrams::Base] The diagram to compare against.
+    # @return [Hash[Symbol, Hash[Symbol, Array[untyped]]]] A hash describing differences.
+    def diff: (Diagrams::Base other) -> Hash[Symbol, Hash[Symbol, Array[untyped]]]
 
-    protected
+    # --- End Deserialization Methods ---
 
     # Recalculates the diagram's checksum based on its current content
     # and updates the @checksum instance variable.
