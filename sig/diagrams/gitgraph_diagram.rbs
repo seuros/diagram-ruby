@@ -1,0 +1,35 @@
+module Diagrams
+  # Represents a Gitgraph diagram, tracking commits, branches, and their relationships.
+  class GitgraphDiagram < Base
+    # Instance Variables (via attr_reader)
+    attr_reader commits: Hash[String, Elements::GitCommit]
+    attr_reader branches: Hash[String, Elements::GitBranch]
+    attr_reader commit_order: Array[String]
+    attr_reader current_branch_name: String
+
+    # Initialization
+    def initialize: (?version: String | Integer) -> void
+
+    # --- Git Operations ---
+    def commit: (?id: String?, ?message: String?, ?tag: String?, ?type: Symbol) -> Elements::GitCommit
+    def branch: (name: String, ?start_commit_id: String?) -> Elements::GitBranch
+    def checkout: (name: String) -> String
+    def merge: (from_branch_name: String, ?id: String?, ?tag: String?, ?type: Symbol) -> Elements::GitCommit
+    def cherry_pick: (commit_id: String, ?parent_override_id: String?) -> Elements::GitCommit
+
+    # --- Base Class Implementation ---
+    def to_h_content: () -> Hash[Symbol, untyped] # More specific: Hash[Symbol, Array[Hash[Symbol, untyped]] | Array[String] | String]
+    def identifiable_elements: () -> Hash[Symbol, Array[Elements::GitCommit | Elements::GitBranch]]
+
+    # Class method for deserialization
+    def self.from_h: (Hash[Symbol, untyped] data_hash, version: String | Integer | nil, checksum: String?) -> GitgraphDiagram
+
+    # --- Private/Protected Methods ---
+    private
+    def generate_commit_id: (Array[String] parent_ids, String? message) -> String
+    def current_head_commit_id: () -> String?
+
+    # Inherited protected method
+    # def update_checksum!: () -> String # Defined in Base, but accessible via send in from_h
+  end
+end

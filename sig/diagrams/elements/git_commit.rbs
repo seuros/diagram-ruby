@@ -1,0 +1,23 @@
+module Diagrams
+  module Elements
+    # Represents a commit in a Gitgraph diagram.
+    class GitCommit < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader id: String
+      attr_reader parent_ids: Array[String]
+      attr_reader branch_name: String
+      attr_reader message: String?
+      attr_reader tag: String?
+      attr_reader type: Symbol # :NORMAL | :REVERSE | :HIGHLIGHT | :MERGE | :CHERRY_PICK
+      attr_reader cherry_pick_source_id: String?
+
+      # Methods
+      def initialize: (id: String, ?parent_ids: Array[String], branch_name: String, ?message: String?, ?tag: String?, ?type: Symbol, ?cherry_pick_source_id: String?) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Array[String] | Symbol]
+    end
+  end
+end

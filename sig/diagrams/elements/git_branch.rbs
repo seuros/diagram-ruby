@@ -1,0 +1,19 @@
+module Diagrams
+  module Elements
+    # Represents a branch in a Gitgraph diagram.
+    class GitBranch < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader name: String
+      attr_reader head_commit_id: String?
+      attr_reader start_commit_id: String
+
+      # Methods
+      def initialize: (name: String, ?head_commit_id: String?, start_commit_id: String) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String]
+    end
+  end
+end
