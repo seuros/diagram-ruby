@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.1...diagram/v0.3.2) (2025-04-01)
+
+
+### Bug Fixes
+
+* update base ([c747d64](https://github.com/seuros/diagram-ruby/commit/c747d64d48393a20b6d4a583d6534325a38e2988))
+
 ## [0.3.1](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.0...diagram/v0.3.1) (2025-04-01)
 
 
