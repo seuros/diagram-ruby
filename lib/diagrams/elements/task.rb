@@ -7,17 +7,29 @@ module Diagrams
       # Use the shared Types module
       include Elements::Types
 
-      attribute :id, Types::Strict::String.constrained(min_size: 1)
-      attribute :name, Types::Strict::String.constrained(min_size: 1)
-      # Using String for dates initially for simplicity.
-      # Consider Types::Strict::Date or custom coercible types later.
-      attribute :start_date, Types::Strict::String.constrained(min_size: 1) # Basic check
-      attribute :end_date, Types::Strict::String.constrained(min_size: 1)   # Basic check
-      # TODO: Add dependencies attribute (e.g., Types::Strict::Array.of(Types::Strict::String))
+      # Status symbols allowed by Mermaid Gantt
+      STATUS = Types::Strict::Symbol.enum(:done, :active, :crit)
+
+      # Attributes
+      attribute :id, Types::Strict::String.constrained(min_size: 1) # Unique ID for dependencies
+      attribute :label, Types::Strict::String.constrained(min_size: 1) # Display name
+      attribute :status, STATUS.optional.default(nil) # Task status (nil implies default/future)
+      attribute :start, Types::Strict::String.constrained(min_size: 1) # Start date, task ID, or 'after taskX[, taskY]'
+      attribute :duration, Types::Strict::String.constrained(min_size: 1) # Duration string (e.g., '7d', '2w')
 
       # Returns a hash representation suitable for serialization.
       #
-      # @return [Hash{Symbol => String}]
+      # @return [Hash{Symbol => String | Symbol | nil}]
+      def to_h
+        hash = {
+          id: id,
+          label: label,
+          start: start,
+          duration: duration
+        }
+        hash[:status] = status if status # Include status only if set
+        hash
+      end
     end
   end
 end

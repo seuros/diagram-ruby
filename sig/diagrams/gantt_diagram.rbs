@@ -1,29 +1,47 @@
 module Diagrams
+  # Represents a Gantt Chart diagram consisting of tasks over time, grouped into sections.
   class GanttDiagram < Base
-    attr_reader title: ::String
-    attr_reader tasks: ::Array[Elements::Task]
+    DEFAULT_SECTION_TITLE: String
+
+    attr_reader title: String?
+    attr_reader sections: Array[Elements::GanttSection] # Use GanttSection
 
     # Initializes a new GanttDiagram.
-    def initialize: (?title: ::String?, ?tasks: ::Array[Elements::Task]?, ?version: Integer | String?) -> void
+    def initialize: (?title: String?, ?sections: Array[Elements::GanttSection]?, ?version: String | Integer) -> void
 
-    # Adds a task to the diagram.
-    def add_task: (Elements::Task task) -> Elements::Task
+    # Adds a new section to the diagram.
+    def add_section: (String section_title) -> Elements::GanttSection
 
-    # Finds a task by its ID.
-    def find_task: (::String task_id) -> Elements::Task?
+    # Adds a task to the current (last) section of the diagram.
+    def add_task: (id: String, label: String, start: String, duration: String, ?status: Elements::Task::STATUS?) -> Elements::Task
+
+    # Finds a task by its ID across all sections.
+    def find_task: (String task_id) -> Elements::Task?
+
+    # Finds a section by its title.
+    def find_section: (String section_title) -> Elements::GanttSection?
 
     # Returns the specific content of the Gantt diagram as a hash.
-    def to_h_content: () -> { title: ::String, tasks: ::Array[Hash[Symbol, untyped]] }
+    def to_h_content: () -> Hash[Symbol, untyped] # More specific: { title: String?, sections: Array[Hash] }
 
     # Returns a hash mapping element types to their collections for diffing.
-    def identifiable_elements: () -> { tasks: ::Array[Elements::Task] }
+    def identifiable_elements: () -> Hash[Symbol, Array[Elements::Task]] # Diffing tasks directly
 
     # Class method to create a GanttDiagram from a hash.
-    def self.from_h: (Hash[Symbol | String, untyped] data_hash, version: Integer | String?, checksum: String?) -> GanttDiagram
+    def self.from_h: (Hash[Symbol, untyped] data_hash, version: String | Integer | nil, checksum: String?) -> GanttDiagram
 
     private
 
+    # Helper to get all tasks from all sections.
+    def all_tasks: () -> Array[Elements::Task]
+
+    # Ensures a default section exists if the sections array is empty.
+    def ensure_default_section: () -> void
+
     # Validates the consistency of tasks during initialization.
     def validate_elements!: () -> void
+
+    # Inherited protected method
+    # def update_checksum!: () -> String
   end
 end

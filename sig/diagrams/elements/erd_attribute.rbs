@@ -1,0 +1,20 @@
+module Diagrams
+  module Elements
+    # Represents an attribute within an ERD entity.
+    class ERDAttribute < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader type: String
+      attr_reader name: String
+      attr_reader keys: Array[Symbol] # :PK | :FK | :UK
+      attr_reader comment: String?
+
+      # Methods
+      def initialize: (type: String, name: String, ?keys: Array[Symbol], ?comment: String?) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Array[Symbol]]
+    end
+  end
+end

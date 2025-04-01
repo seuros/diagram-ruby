@@ -40,9 +40,7 @@ module Diagrams
     def add_section(section_title)
       clean_title = section_title.strip
       raise ArgumentError, "Section title '#{clean_title}' cannot be empty" if clean_title.empty?
-      if find_section(clean_title)
-        raise ArgumentError, "Section with title '#{clean_title}' already exists"
-      end
+      raise ArgumentError, "Section with title '#{clean_title}' already exists" if find_section(clean_title)
 
       # Remove default section if it's empty and we're adding a real one
       if @sections.size == 1 && @sections.first.title == DEFAULT_SECTION_TITLE && @sections.first.periods.empty?
@@ -64,16 +62,16 @@ module Diagrams
     # @return [Elements::TimelinePeriod] The newly added period.
     def add_period(period_label:, events:)
       clean_label = period_label.strip
-      raise ArgumentError, "Period label cannot be empty" if clean_label.empty?
+      raise ArgumentError, 'Period label cannot be empty' if clean_label.empty?
 
       event_list = Array(events).map(&:strip).reject(&:empty?)
-      raise ArgumentError, "Events cannot be empty" if event_list.empty?
+      raise ArgumentError, 'Events cannot be empty' if event_list.empty?
 
       timeline_events = event_list.map { |desc| Elements::TimelineEvent.new(description: desc) }
       new_period = Elements::TimelinePeriod.new(label: clean_label, events: timeline_events)
 
       current_section = @sections.last
-      raise StandardError, "Cannot add period: No section available." unless current_section
+      raise StandardError, 'Cannot add period: No section available.' unless current_section
 
       # Add period to the current section's periods array
       # Dry::Struct arrays are immutable, so we need to create a new section object
@@ -145,9 +143,9 @@ module Diagrams
 
     # Ensures a default section exists if the sections array is empty.
     def ensure_default_section
-      unless @sections.any? { |s| s.title == DEFAULT_SECTION_TITLE }
-        @sections << Elements::TimelineSection.new(title: DEFAULT_SECTION_TITLE)
-      end
+      return if @sections.any? { |s| s.title == DEFAULT_SECTION_TITLE }
+
+      @sections << Elements::TimelineSection.new(title: DEFAULT_SECTION_TITLE)
     end
 
     # Finds a section by its title.

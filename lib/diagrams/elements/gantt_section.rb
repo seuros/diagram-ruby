@@ -2,12 +2,12 @@
 
 module Diagrams
   module Elements
-    # Represents a section or age within the timeline, grouping multiple time periods.
-    class TimelineSection < Dry::Struct
+    # Represents a section within a Gantt chart, grouping multiple tasks.
+    class GanttSection < Dry::Struct
       include Elements::Types
 
       attribute :title, Types::Strict::String.constrained(min_size: 1)
-      attribute :periods, Types::Strict::Array.of(TimelinePeriod).default([].freeze)
+      attribute :tasks, Types::Strict::Array.of(Task).default([].freeze)
 
       # Returns a hash representation suitable for serialization.
       #
@@ -15,7 +15,7 @@ module Diagrams
       def to_h
         {
           title:,
-          periods: periods.map(&:to_h)
+          tasks: tasks.map(&:to_h)
         }
       end
     end

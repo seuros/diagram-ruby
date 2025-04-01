@@ -19,12 +19,14 @@ module Diagrams
 
     def test_initialization_with_title
       diagram = TimelineDiagram.new(title: ' My Timeline ')
+
       assert_equal 'My Timeline', diagram.title
     end
 
     def test_set_title
       old_checksum = @diagram.checksum
       @diagram.set_title(' History ')
+
       assert_equal 'History', @diagram.title
       refute_equal old_checksum, @diagram.checksum
     end
@@ -32,6 +34,7 @@ module Diagrams
     def test_add_section
       old_checksum = @diagram.checksum
       section = @diagram.add_section(' First Section ')
+
       assert_equal 1, @diagram.sections.size # Default section removed
       assert_equal 'First Section', section.title
       assert_equal section, @diagram.sections.last
@@ -39,6 +42,7 @@ module Diagrams
 
       # Add another section
       section2 = @diagram.add_section('Second Section')
+
       assert_equal 2, @diagram.sections.size
       assert_equal section2, @diagram.sections.last
     end
@@ -59,8 +63,10 @@ module Diagrams
     def test_add_period_to_default_section
       old_checksum = @diagram.checksum
       period = @diagram.add_period(period_label: ' 2002 ', events: ' Event A ')
+
       assert_equal 1, @diagram.sections.size
       current_section = @diagram.sections.first
+
       assert_equal TimelineDiagram::DEFAULT_SECTION_TITLE, current_section.title
       assert_equal 1, current_section.periods.size
       assert_equal period, current_section.periods.first
@@ -76,6 +82,7 @@ module Diagrams
 
       assert_equal 1, @diagram.sections.size
       current_section = @diagram.sections.first
+
       assert_equal 'Custom Section', current_section.title
       assert_equal 1, current_section.periods.size
       assert_equal period, current_section.periods.first
@@ -85,28 +92,30 @@ module Diagrams
       assert_equal 'Event C', period.events[1].description
     end
 
-     def test_add_period_multiple_to_same_section
+    def test_add_period_multiple_to_same_section
       @diagram.add_section('My Section')
       period1 = @diagram.add_period(period_label: 'Morning', events: 'Wake up')
       period2 = @diagram.add_period(period_label: 'Afternoon', events: 'Work')
 
       assert_equal 1, @diagram.sections.size
       current_section = @diagram.sections.first
+
       assert_equal 2, current_section.periods.size
       assert_equal period1, current_section.periods[0]
       assert_equal period2, current_section.periods[1]
     end
 
     def test_add_period_to_different_sections
-      section1 = @diagram.add_section('Section A')
+      @diagram.add_section('Section A')
       period_a = @diagram.add_period(period_label: 'A1', events: 'Event A')
-      section2 = @diagram.add_section('Section B')
+      @diagram.add_section('Section B')
       period_b = @diagram.add_period(period_label: 'B1', events: 'Event B')
 
       assert_equal 2, @diagram.sections.size
       # Re-fetch sections after potential modifications due to add_period
       fetched_section1 = @diagram.sections.find { |s| s.title == 'Section A' }
       fetched_section2 = @diagram.sections.find { |s| s.title == 'Section B' }
+
       assert_equal fetched_section1, @diagram.sections[0]
       assert_equal fetched_section2, @diagram.sections[1]
       assert_equal 1, fetched_section1.periods.size
@@ -134,7 +143,7 @@ module Diagrams
       @diagram.set_title('Social Media History')
       @diagram.add_section('Early Days')
       @diagram.add_period(period_label: '2002', events: 'LinkedIn')
-      @diagram.add_period(period_label: '2004', events: ['Facebook', 'Google'])
+      @diagram.add_period(period_label: '2004', events: %w[Facebook Google])
       @diagram.add_section('Growth Phase')
       @diagram.add_period(period_label: '2005', events: 'YouTube')
       @diagram.add_period(period_label: '2006', events: 'Twitter')
@@ -202,6 +211,7 @@ module Diagrams
       section2 = diagram2.add_section('S2') # Added
 
       diff = diagram1.diff(diagram2)
+
       assert_equal 1, diff.size
       assert diff.key?(:sections)
       assert diff[:sections].key?(:added)
@@ -219,6 +229,7 @@ module Diagrams
       diagram2.add_section('S1')
 
       diff = diagram1.diff(diagram2)
+
       assert_equal 1, diff.size
       assert diff.key?(:sections)
       assert diff[:sections].key?(:removed)
@@ -248,6 +259,7 @@ module Diagrams
       assert diff[:sections].key?(:modified)
       assert_equal 1, diff[:sections][:modified].size
       mod = diff[:sections][:modified].first
+
       assert_equal diagram1.sections[0], mod[:old]
       assert_equal diagram2.sections[0], mod[:new]
     end
@@ -273,11 +285,13 @@ module Diagrams
       assert diff[:sections].key?(:modified)
       assert_equal 1, diff[:sections][:modified].size
       mod = diff[:sections][:modified].first
+
       assert_equal diagram1.sections[0], mod[:old]
       assert_equal diagram2.sections[0], mod[:new]
     end
 
-    def test_diff_modified_period_event # Basic modification check
+    # Basic modification check
+    def test_diff_modified_period_event
       diagram1 = TimelineDiagram.new(title: 'T')
       diagram1.add_section('S1')
       period1_v1 = diagram1.add_period(period_label: 'P1', events: 'E1')
@@ -293,6 +307,7 @@ module Diagrams
       assert diff[:periods].key?(:modified)
       assert_equal 1, diff[:periods][:modified].size
       period_mod = diff[:periods][:modified].first
+
       assert_equal period1_v1, period_mod[:old]
       assert_equal period1_v2, period_mod[:new]
 
@@ -300,6 +315,7 @@ module Diagrams
       assert diff[:sections].key?(:modified)
       assert_equal 1, diff[:sections][:modified].size
       section_mod = diff[:sections][:modified].first
+
       assert_equal diagram1.sections[0], section_mod[:old]
       assert_equal diagram2.sections[0], section_mod[:new]
     end

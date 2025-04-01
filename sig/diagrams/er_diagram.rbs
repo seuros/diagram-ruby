@@ -1,0 +1,30 @@
+module Diagrams
+  # Represents an Entity Relationship Diagram (ERD).
+  class ERDiagram < Base
+    # Instance Variables (via attr_reader)
+    attr_reader entities: Hash[String, Elements::ERDEntity]
+    attr_reader relationships: Array[Elements::ERDRelationship]
+
+    # Initialization
+    def initialize: (?entities: Array[Elements::ERDEntity], ?relationships: Array[Elements::ERDRelationship], ?version: String | Integer) -> void
+
+    # Public Methods
+    def add_entity: (name: String, ?attributes: Array[Hash[Symbol, untyped]]) -> Elements::ERDEntity
+    def add_relationship: (entity1: String, entity2: String, cardinality1: Symbol, cardinality2: Symbol, ?identifying: bool, ?label: String?) -> Elements::ERDRelationship
+    def find_entity: (String entity_name) -> Elements::ERDEntity?
+
+    # --- Base Class Implementation ---
+    def to_h_content: () -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+    def identifiable_elements: () -> Hash[Symbol, Array[Elements::ERDEntity | Elements::ERDRelationship]]
+
+    # Class method for deserialization
+    def self.from_h: (Hash[Symbol, untyped] data_hash, version: String | Integer | nil, checksum: String?) -> ERDiagram
+
+    # --- Private Methods ---
+    private
+    def validate_relationships!: () -> void
+
+    # Inherited protected method
+    # def update_checksum!: () -> String
+  end
+end

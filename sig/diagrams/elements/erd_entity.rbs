@@ -1,0 +1,20 @@
+require_relative 'erd_attribute'
+
+module Diagrams
+  module Elements
+    # Represents an entity (table) in an ER Diagram.
+    class ERDEntity < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader name: String
+      attr_reader entity_attributes: Array[ERDAttribute]
+
+      # Methods
+      def initialize: (name: String, ?entity_attributes: Array[ERDAttribute]) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Array[Hash[Symbol, untyped]]] # Output key is still :attributes
+    end
+  end
+end

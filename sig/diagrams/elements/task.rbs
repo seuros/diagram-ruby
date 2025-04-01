@@ -4,13 +4,21 @@ module Diagrams
       include Diagrams::Elements::Types
 
       # Attributes
-      def id: () -> ::String
-      def name: () -> ::String
-      def start_date: () -> ::String # Or ::Date if type is changed
-      def end_date: () -> ::String   # Or ::Date if type is changed
+      # Type alias for status symbols
+      type STATUS = :done | :active | :crit
+
+      # Attributes
+      attr_reader id: String       # Unique ID for dependencies
+      attr_reader label: String    # Display name
+      attr_reader status: STATUS?  # Task status (nil implies default/future)
+      attr_reader start: String    # Start date, task ID, or 'after taskX[, taskY]'
+      attr_reader duration: String # Duration string (e.g., '7d', '2w')
 
       # Methods
-      def to_h: () -> { id: ::String, name: ::String, start_date: ::String, end_date: ::String }
+      def initialize: (id: String, label: String, start: String, duration: String, ?status: STATUS?) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Symbol | nil]
     end
   end
 end

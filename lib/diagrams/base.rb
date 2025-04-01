@@ -66,13 +66,13 @@ module Diagrams
         other_collection = other_elements[type] || []
 
         # Determine identifier method (prefer id, then name, then title, then label, fallback to object itself)
-        identifier_method = if self_collection.first&.respond_to?(:id)
+        identifier_method = if self_collection.first.respond_to?(:id)
                               :id
-                            elsif self_collection.first&.respond_to?(:name)
+                            elsif self_collection.first.respond_to?(:name)
                               :name
-                            elsif self_collection.first&.respond_to?(:title) # For TimelineSection
+                            elsif self_collection.first.respond_to?(:title) # For TimelineSection
                               :title
-                            elsif self_collection.first&.respond_to?(:label) # For Slice, TimelinePeriod
+                            elsif self_collection.first.respond_to?(:label) # For Slice, TimelinePeriod
                               :label
                             else
                               :itself # Fallback to object identity/equality
@@ -196,6 +196,10 @@ module Diagrams
       # Simple helper to convert snake_case to CamelCase
       # (Avoids ActiveSupport dependency)
       def snake_to_camel_case(string)
+        # Handle specific acronyms first
+        return 'ERDiagram' if string == 'er_diagram'
+
+        # Default conversion
         string.split('_').collect(&:capitalize).join
       end
     end

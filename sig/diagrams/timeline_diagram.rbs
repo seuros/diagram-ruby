@@ -1,33 +1,14 @@
+# RBS signatures for patches applied to the 'diagram' gem's TimelineDiagram class
 module Diagrams
-  # Represents a timeline diagram illustrating a chronology of events.
   class TimelineDiagram < Base
-    DEFAULT_SECTION_TITLE: String
+    # Added by mermaid-ruby gem
+    # Generates the Mermaid syntax for the timeline diagram.
+    def to_mermaid: () -> String
 
-    # Instance Variables (via attr_reader)
-    attr_reader title: String?
-    attr_reader sections: Array[Elements::TimelineSection]
-
-    # Initialization
-    def initialize: (?title: String?, ?sections: Array[Elements::TimelineSection], ?version: String | Integer) -> void
-
-    # Public Methods
-    def set_title: (String new_title) -> String
-    def add_section: (String section_title) -> Elements::TimelineSection
-    def add_period: (period_label: String, events: String | Array[String]) -> Elements::TimelinePeriod
-
-    # --- Base Class Implementation ---
-    def to_h_content: () -> Hash[Symbol, untyped] # More specific: Hash[:title?, String | :sections, Array[Hash]]
-    def identifiable_elements: () -> Hash[Symbol, Array[Elements::TimelineSection | Elements::TimelinePeriod]]
-
-    # Class method for deserialization
-    def self.from_h: (Hash[Symbol, untyped] data_hash, version: String | Integer | nil, checksum: String?) -> TimelineDiagram
-
-    # --- Private Methods ---
-    private
-    def ensure_default_section: () -> void
-    def find_section: (String section_title) -> Elements::TimelineSection?
-
-    # Inherited protected method
-    # def update_checksum!: () -> String
+    # Original methods from diagram gem (if known/needed for context)
+    # attr_reader title: String?
+    # attr_reader sections: Array[Elements::TimelineSection]
+    # def initialize: (?title: String?, ?sections: Array[Elements::TimelineSection], ?version: untyped) -> void
+    # ... other methods ...
   end
 end

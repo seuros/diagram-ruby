@@ -1,0 +1,25 @@
+module Diagrams
+  module Elements
+    # Represents a relationship between two entities in an ER Diagram.
+    class ERDRelationship < ::Dry::Struct
+      include Elements::Types
+
+      # Type alias for cardinality symbols
+      type CARDINALITY = :ZERO_OR_ONE | :ONE_ONLY | :ZERO_OR_MORE | :ONE_OR_MORE
+
+      # Attributes
+      attr_reader entity1: String
+      attr_reader entity2: String
+      attr_reader cardinality1: CARDINALITY
+      attr_reader cardinality2: CARDINALITY
+      attr_reader identifying: bool
+      attr_reader label: String?
+
+      # Methods
+      def initialize: (entity1: String, entity2: String, cardinality1: CARDINALITY, cardinality2: CARDINALITY, ?identifying: bool, ?label: String?) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Symbol | bool]
+    end
+  end
+end
