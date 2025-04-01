@@ -1,0 +1,17 @@
+module Diagrams
+  module Elements
+    # Represents a single event description within a timeline period.
+    class TimelineEvent < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader description: String
+
+      # Methods
+      def initialize: (description: String) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String]
+    end
+  end
+end

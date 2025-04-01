@@ -1,0 +1,18 @@
+module Diagrams
+  module Elements
+    # Represents a specific time period on the timeline, containing one or more events.
+    class TimelinePeriod < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader label: String
+      attr_reader events: Array[TimelineEvent]
+
+      # Methods
+      def initialize: (label: String, events: Array[TimelineEvent]) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Array[Hash[Symbol, String]]]
+    end
+  end
+end

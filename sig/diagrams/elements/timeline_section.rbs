@@ -1,0 +1,18 @@
+module Diagrams
+  module Elements
+    # Represents a section or age within the timeline, grouping multiple time periods.
+    class TimelineSection < ::Dry::Struct
+      include Elements::Types
+
+      # Attributes
+      attr_reader title: String
+      attr_reader periods: Array[TimelinePeriod]
+
+      # Methods
+      def initialize: (title: String, ?periods: Array[TimelinePeriod]) -> void
+                     | (Hash[Symbol, untyped]) -> void # Allow hash initialization
+
+      def to_h: () -> Hash[Symbol, String | Array[Hash[Symbol, untyped]]]
+    end
+  end
+end
