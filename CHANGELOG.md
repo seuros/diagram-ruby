@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.1](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.0...diagram/v0.3.1) (2025-04-01)
+
+
+### Features
+
+* Add GitgraphDiagram type ([7718482](https://github.com/seuros/diagram-ruby/commit/77184820be127a6ca681cf1f0f68697ac0ab776f))
+* Add TimelineDiagram type ([49ebea5](https://github.com/seuros/diagram-ruby/commit/49ebea5901239d7427b14d6324f9829b230a56f2))
+
+
+### Bug Fixes
+
+* add mermaid.rb to let the gem autoload ([ef728b7](https://github.com/seuros/diagram-ruby/commit/ef728b77a4a81457e58d2c85a75fdd2b0d1b3eaa))
+* use zeitwrek autoload ([ef728b7](https://github.com/seuros/diagram-ruby/commit/ef728b77a4a81457e58d2c85a75fdd2b0d1b3eaa))
+
 ## [0.3.0](https://github.com/seuros/diagram-ruby/compare/diagram/v0.2.1...diagram/v0.3.0) (2025-03-31)
 
 
