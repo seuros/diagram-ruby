@@ -65,12 +65,14 @@ module Diagrams
         self_collection = self_elements[type] || []
         other_collection = other_elements[type] || []
 
-        # Determine identifier method (prefer id, then name, fallback to object itself)
-        identifier_method = if self_collection.first.respond_to?(:id)
+        # Determine identifier method (prefer id, then name, then title, then label, fallback to object itself)
+        identifier_method = if self_collection.first&.respond_to?(:id)
                               :id
-                            elsif self_collection.first.respond_to?(:name)
+                            elsif self_collection.first&.respond_to?(:name)
                               :name
-                            elsif self_collection.first.respond_to?(:label) # For Slice
+                            elsif self_collection.first&.respond_to?(:title) # For TimelineSection
+                              :title
+                            elsif self_collection.first&.respond_to?(:label) # For Slice, TimelinePeriod
                               :label
                             else
                               :itself # Fallback to object identity/equality
