@@ -12,8 +12,8 @@ module Diagrams
     # @param version [String, Integer, nil] User-defined version identifier.
     def initialize(classes: [], relationships: [], version: 1)
       super(version:)
-      @classes = classes.is_a?(Array) ? classes : []
-      @relationships = relationships.is_a?(Array) ? relationships : []
+      @classes = Array(classes)
+      @relationships = Array(relationships)
       validate_elements!
       update_checksum!
     end

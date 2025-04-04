@@ -12,8 +12,8 @@ module Diagrams
     # @param version [String, Integer, nil] User-defined version identifier.
     def initialize(nodes: [], edges: [], version: 1)
       super(version:)
-      @nodes = nodes.is_a?(Array) ? nodes : []
-      @edges = edges.is_a?(Array) ? edges : []
+      @nodes = Array(nodes)
+      @edges = Array(edges)
       validate_elements!
       update_checksum!
     end

@@ -15,7 +15,7 @@ module Diagrams
       @title = title.is_a?(String) ? title : ''
       @slices = [] # Initialize empty
       # Add initial slices using the corrected add_slice method
-      (slices.is_a?(Array) ? slices : []).each { |s| add_slice(s, update_checksum: false, initial_load: true) }
+      Array(slices).each { |s| add_slice(s, update_checksum: false, initial_load: true) }
       recalculate_percentages! # Calculate initial percentages
       update_checksum! # Calculate final checksum after initial load
     end

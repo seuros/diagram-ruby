@@ -12,8 +12,8 @@ module Diagrams
     # @param version [String, Integer, nil] User-defined version identifier.
     def initialize(entities: [], relationships: [], version: 1)
       super(version:)
-      @entities = (entities.is_a?(Array) ? entities : []).each_with_object({}) { |e, h| h[e.name] = e }
-      @relationships = relationships.is_a?(Array) ? relationships : []
+      @entities = Array(entities).each_with_object({}) { |e, h| h[e.name] = e }
+      @relationships = Array(relationships)
       validate_relationships!
       update_checksum!
     end

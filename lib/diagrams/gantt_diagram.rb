@@ -15,7 +15,7 @@ module Diagrams
     def initialize(title: '', sections: [], version: 1)
       super(version:)
       @title = title.is_a?(String) ? title : ''
-      @sections = sections.is_a?(Array) ? sections : []
+      @sections = Array(sections)
       ensure_default_section if @sections.empty?
       validate_elements!
       update_checksum!

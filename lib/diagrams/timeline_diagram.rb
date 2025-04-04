@@ -15,7 +15,7 @@ module Diagrams
     def initialize(title: nil, sections: [], version: 1)
       super(version:)
       @title = title&.strip
-      @sections = sections.is_a?(Array) ? sections : []
+      @sections = Array(sections)
       # Ensure there's always at least a default section if none provided initially
       ensure_default_section if @sections.empty?
       update_checksum!

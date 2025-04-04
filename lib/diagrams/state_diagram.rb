@@ -15,9 +15,9 @@ module Diagrams
     def initialize(title: '', states: [], transitions: [], events: [], version: 1)
       super(version:)
       @title = title.is_a?(String) ? title : ''
-      @states = states.is_a?(Array) ? states : []
-      @transitions = transitions.is_a?(Array) ? transitions : []
-      @events = events.is_a?(Array) ? events : [] # Keep events for now
+      @states = Array(states)
+      @transitions = Array(transitions)
+      @events = Array(events) # Keep events for now
       validate_elements!
       update_checksum!
     end
