@@ -19,8 +19,7 @@ module Diagrams
       #
       # @return [Hash{Symbol => String | nil}]
       def to_h
-        # Rely on Dry::Struct's default to_h, which includes all attributes.
-        # Filter out nil label if desired.
+        # Start with Dry::Struct's hash and drop nil attributes.
         super.compact
       end
     end

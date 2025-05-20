@@ -18,6 +18,14 @@ module Diagrams
       # Returns a hash representation suitable for serialization.
       #
       # @return [Hash{Symbol => String | Float | nil}]
+      def to_h
+        hash = {
+          label:,
+          value:
+        }
+        hash[:percentage] = percentage if percentage
+        hash
+      end
     end
   end
 end

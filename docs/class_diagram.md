@@ -15,52 +15,63 @@ require 'pp'       # For pretty printing hashes
 diagram = Diagrams::ClassDiagram.new(version: '1.0')
 
 # 2. Add classes with attributes and methods
-vehicle = diagram.add_class(
+vehicle = Diagrams::Elements::ClassEntity.new(
   name: 'Vehicle',
   attributes: ['+max_speed: int', '-current_speed: int'],
   methods: ['+start()', '+stop()', '#accelerate(amount: int)']
 )
 
-car = diagram.add_class(
+car = Diagrams::Elements::ClassEntity.new(
   name: 'Car',
   attributes: ['-num_doors: int'],
   methods: ['+open_trunk()']
 )
 
-engine = diagram.add_class(
+engine = Diagrams::Elements::ClassEntity.new(
   name: 'Engine',
   attributes: ['~horsepower: int'],
   methods: ['+ignite()']
 )
 
-driver = diagram.add_class(
+driver = Diagrams::Elements::ClassEntity.new( 
   name: 'Driver',
   attributes: ['+name: string'],
   methods: ['+drive(vehicle: Vehicle)']
 )
 
+diagram.add_class(vehicle)
+diagram.add_class(car)
+diagram.add_class(engine)
+diagram.add_class(driver)
+
 # 3. Add relationships
 # Inheritance (Car -> Vehicle)
 diagram.add_relationship(
-  type: :inheritance,
-  source: car.name, # Use class name as ID
-  target: vehicle.name
+  Diagrams::Elements::Relationship.new(
+    type: 'inheritance',
+    source_class_name: car.name, # Use class name as ID
+    target_class_name: vehicle.name
+  )
 )
 
 # Composition (Car has an Engine)
 diagram.add_relationship(
-  type: :composition,
-  source: car.name,
-  target: engine.name,
-  label: '1' # Cardinality (Car has 1 Engine)
+  Diagrams::Elements::Relationship.new(
+    type: 'composition',
+    source_class_name: car.name,
+    target_class_name: engine.name,
+    label: '1' # Cardinality (Car has 1 Engine)
+  )
 )
 
 # Association (Driver drives a Vehicle)
 diagram.add_relationship(
-  type: :association,
-  source: driver.name,
-  target: vehicle.name,
-  label: 'drives >' # Label and direction
+  Diagrams::Elements::Relationship.new(
+    type: 'association',
+    source_class_name: driver.name,
+    target_class_name: vehicle.name,
+    label: 'drives >' # Label and direction
+  )
 )
 
 
@@ -81,9 +92,9 @@ puts JSON.pretty_generate(JSON.parse(json_string))
 #       { "name": "Driver", "attributes": ["+name: string"], "methods": ["+drive(vehicle: Vehicle)"] }
 #     ],
 #     "relationships": [
-#       { "type": "inheritance", "source": "Car", "target": "Vehicle" },
-#       { "type": "composition", "source": "Car", "target": "Engine", "label": "1" },
-#       { "type": "association", "source": "Driver", "target": "Vehicle", "label": "drives >" }
+#       { "type": "inheritance", "source_class_name": "Car", "target_class_name": "Vehicle" },
+#       { "type": "composition", "source_class_name": "Car", "target_class_name": "Engine", "label": "1" },
+#       { "type": "association", "source_class_name": "Driver", "target_class_name": "Vehicle", "label": "drives >" }
 #     ]
 #   }
 # }

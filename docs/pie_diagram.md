@@ -16,12 +16,18 @@ diagram = Diagrams::PieDiagram.new(title: 'Browser Market Share - Q1 2025', vers
 
 # 2. Add data slices
 # Each slice needs a label (String) and a value (Numeric).
-diagram.add_slice(label: 'Chrome', value: 65.8)
-diagram.add_slice(label: 'Safari', value: 18.5)
-diagram.add_slice(label: 'Edge', value: 5.2)
-diagram.add_slice(label: 'Firefox', value: 3.1)
+chrome  = Diagrams::Elements::Slice.new(label: 'Chrome', value: 65.8)
+safari  = Diagrams::Elements::Slice.new(label: 'Safari', value: 18.5)
+edge    = Diagrams::Elements::Slice.new(label: 'Edge', value: 5.2)
+firefox = Diagrams::Elements::Slice.new(label: 'Firefox', value: 3.1)
 # Add a slice representing multiple smaller browsers
-diagram.add_slice(label: 'Others', value: 100 - (65.8 + 18.5 + 5.2 + 3.1)) # Calculate remaining percentage
+others  = Diagrams::Elements::Slice.new(label: 'Others', value: 100 - (65.8 + 18.5 + 5.2 + 3.1))
+
+diagram.add_slice(chrome)
+diagram.add_slice(safari)
+diagram.add_slice(edge)
+diagram.add_slice(firefox)
+diagram.add_slice(others)
 
 # 3. Serialize to Hash
 diagram_hash = diagram.to_h
