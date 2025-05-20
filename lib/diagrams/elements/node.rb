@@ -21,9 +21,6 @@ module Diagrams
           id:,
           label:
         }
-        # Dry::Struct automatically provides a to_h method,
-        # but defining it explicitly ensures the desired structure.
-        # super # Alternatively, call super if the default is sufficient.
       end
     end
   end

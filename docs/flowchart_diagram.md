@@ -14,24 +14,31 @@ require 'pp'       # For pretty printing hashes
 # 1. Create a new Flowchart diagram
 diagram = Diagrams::FlowchartDiagram.new(version: '2.1')
 
-# 2. Add nodes with different shapes/labels
+# 2. Add nodes with different labels
 # Node shapes are typically handled by the rendering tool (like Mermaid),
 # but we can represent the *intent* in the label or use specific node types if defined.
-# Here, we use label conventions inspired by Mermaid.
-start_node = diagram.add_node(id: 'start', label: 'Start') # Default shape (rectangle)
-input_node = diagram.add_node(id: 'input', label: 'Enter Credentials') # Default shape
-decision_node = diagram.add_node(id: 'check', label: 'Credentials Valid?') # Rhombus shape often implied by decision logic
-success_node = diagram.add_node(id: 'success', label: 'Login Successful') # Default shape
-fail_node = diagram.add_node(id: 'fail', label: 'Login Failed') # Default shape
-end_node = diagram.add_node(id: 'end', label: 'End') # Default shape
+# Here, we create `Node` objects first and then add them to the diagram.
+start_node = Diagrams::Elements::Node.new(id: 'start', label: 'Start')
+input_node = Diagrams::Elements::Node.new(id: 'input', label: 'Enter Credentials')
+decision_node = Diagrams::Elements::Node.new(id: 'check', label: 'Credentials Valid?')
+success_node = Diagrams::Elements::Node.new(id: 'success', label: 'Login Successful')
+fail_node = Diagrams::Elements::Node.new(id: 'fail', label: 'Login Failed')
+end_node = Diagrams::Elements::Node.new(id: 'end', label: 'End')
+
+diagram.add_node(start_node)
+diagram.add_node(input_node)
+diagram.add_node(decision_node)
+diagram.add_node(success_node)
+diagram.add_node(fail_node)
+diagram.add_node(end_node)
 
 # 3. Add edges connecting the nodes, with labels for decisions
-diagram.add_edge(source_id: start_node.id, target_id: input_node.id)
-diagram.add_edge(source_id: input_node.id, target_id: decision_node.id)
-diagram.add_edge(source_id: decision_node.id, target_id: success_node.id, label: 'Yes')
-diagram.add_edge(source_id: decision_node.id, target_id: fail_node.id, label: 'No')
-diagram.add_edge(source_id: success_node.id, target_id: end_node.id)
-diagram.add_edge(source_id: fail_node.id, target_id: end_node.id)
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: start_node.id, target_id: input_node.id))
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: input_node.id, target_id: decision_node.id))
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: decision_node.id, target_id: success_node.id, label: 'Yes'))
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: decision_node.id, target_id: fail_node.id, label: 'No'))
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: success_node.id, target_id: end_node.id))
+diagram.add_edge(Diagrams::Elements::Edge.new(source_id: fail_node.id, target_id: end_node.id))
 
 # 4. Serialize to Hash
 diagram_hash = diagram.to_h

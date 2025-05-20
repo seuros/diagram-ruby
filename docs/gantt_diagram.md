@@ -19,17 +19,17 @@ diagram = Diagrams::GanttDiagram.new(version: '0.5')
 # 2. Add sections and tasks
 # Sections group related tasks.
 diagram.add_section('Planning Phase')
-# Tasks require a label, status, and start/duration information.
+# Tasks require an ID, label, status, and start/duration information.
 # Status can be :done, :active, or inferred as future if start is later.
 # Start/duration can be dates, IDs (for dependencies), or relative terms.
-task1 = diagram.add_task(label: 'Market Research', status: :done, start: '2024-01-01', duration: '7d')
-task2 = diagram.add_task(label: 'Define Requirements', status: :done, start: 'after task1', duration: '5d') # Dependency
-task3 = diagram.add_task(label: 'Create Mockups', status: :active, start: 'after task2', duration: '10d')
+task1 = diagram.add_task(id: 'task1', label: 'Market Research', status: :done, start: '2024-01-01', duration: '7d')
+task2 = diagram.add_task(id: 'task2', label: 'Define Requirements', status: :done, start: 'after task1', duration: '5d') # Dependency
+task3 = diagram.add_task(id: 'task3', label: 'Create Mockups', status: :active, start: 'after task2', duration: '10d')
 
 diagram.add_section('Development Phase')
-task4 = diagram.add_task(label: 'Setup Environment', status: :active, start: 'after task2', duration: '3d') # Parallel to task3
-task5 = diagram.add_task(label: 'Implement Core Features', start: 'after task3, task4', duration: '20d') # Depends on two tasks
-task6 = diagram.add_task(label: 'Testing', start: 'after task5', duration: '10d')
+task4 = diagram.add_task(id: 'task4', label: 'Setup Environment', status: :active, start: 'after task2', duration: '3d') # Parallel to task3
+task5 = diagram.add_task(id: 'task5', label: 'Implement Core Features', start: 'after task3, task4', duration: '20d') # Depends on two tasks
+task6 = diagram.add_task(id: 'task6', label: 'Testing', start: 'after task5', duration: '10d')
 
 # 3. Serialize to Hash
 diagram_hash = diagram.to_h
@@ -43,14 +43,14 @@ pp diagram_hash
 #   {:sections=>
 #     [{:title=>"Planning Phase",
 #       :tasks=>
-#        [{:label=>"Market Research", :status=>:done, :start=>"2024-01-01", :duration=>"7d"},
-#         {:label=>"Define Requirements", :status=>:done, :start=>"after task1", :duration=>"5d"},
-#         {:label=>"Create Mockups", :status=>:active, :start=>"after task2", :duration=>"10d"}]},
+#        [{:id=>"task1", :label=>"Market Research", :status=>:done, :start=>"2024-01-01", :duration=>"7d"},
+#         {:id=>"task2", :label=>"Define Requirements", :status=>:done, :start=>"after task1", :duration=>"5d"},
+#         {:id=>"task3", :label=>"Create Mockups", :status=>:active, :start=>"after task2", :duration=>"10d"}]},
 #      {:title=>"Development Phase",
 #       :tasks=>
-#        [{:label=>"Setup Environment", :status=>:active, :start=>"after task2", :duration=>"3d"},
-#         {:label=>"Implement Core Features", :start=>"after task3, task4", :duration=>"20d"},
-#         {:label=>"Testing", :start=>"after task5", :duration=>"10d"}]}]}}
+#        [{:id=>"task4", :label=>"Setup Environment", :status=>:active, :start=>"after task2", :duration=>"3d"},
+#         {:id=>"task5", :label=>"Implement Core Features", :start=>"after task3, task4", :duration=>"20d"},
+#         {:id=>"task6", :label=>"Testing", :start=>"after task5", :duration=>"10d"}]}]}}
 
 
 # 4. Deserialize from Hash

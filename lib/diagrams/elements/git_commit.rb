@@ -15,7 +15,6 @@ module Diagrams
       attribute :cherry_pick_source_id, Types::Strict::String.optional.default(nil)
 
       # Returns a hash representation suitable for serialization.
-      # Dry::Struct provides to_h, but explicit definition ensures desired keys/structure.
       # Optional attributes are included only if they have non-nil values.
       #
       # @return [Hash{Symbol => String | Array<String> | Symbol}]

@@ -39,7 +39,7 @@ gem install diagram
 Require the gem and instantiate specific diagram classes.
 
 ```ruby
-require 'diagrams'
+require 'diagram'
 
 # --- Flowchart Example ---
 flowchart = Diagrams::FlowchartDiagram.new(version: '1.0')
@@ -109,7 +109,7 @@ pie_chart.add_slice(slice3)
 pie_chart.add_slice(slice4)
 # pie_chart.add_slice(slice5)
 
-puts "Pie Chart Total: #{pie_chart.current_total}%"
+puts "Pie Chart Total: #{pie_chart.total_value}%"
 # => Pie Chart Total: 96.0%
 
 # (Examples for Gantt and State diagrams can be added similarly)
