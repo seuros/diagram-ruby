@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.5](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.4...diagram/v0.3.5) (2025-06-15)
+
+
+### Features
+
+* add guards and actions to transition ([efcefa3](https://github.com/seuros/diagram-ruby/commit/efcefa3476cd4f2fb7275b47af778657d78b826c))
+* add guards and actions to transition ([6f829ba](https://github.com/seuros/diagram-ruby/commit/6f829badf6a72e8f63dfc883c06848171980575f))
+
 ## [0.3.4](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.3...diagram/v0.3.4) (2025-05-20)
 
 
