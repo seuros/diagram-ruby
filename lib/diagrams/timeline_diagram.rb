@@ -9,10 +9,8 @@ module Diagrams
 
     # +periods+ are TimelinePeriod values or hashes of their members.
     def add_section(title: nil, periods: [])
-      open_section(Elements::TimelineSection, title,
-                   Check.elements(periods, :periods, Elements::TimelinePeriod)) do |period|
-        add_period(**period)
-      end
+      open_section(Elements::TimelineSection, :periods, title,
+                   Check.elements(periods, :periods, Elements::TimelinePeriod))
     end
 
     def add_period(label:, events:)

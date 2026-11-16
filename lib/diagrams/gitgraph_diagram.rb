@@ -25,7 +25,7 @@ module Diagrams
 
     # Creates a branch at +start_commit_id+ (default: the current head) and checks it out.
     def branch(name:, start_commit_id: head_id)
-      raise ArgumentError, 'cannot branch before the first commit' unless start_commit_id
+      raise ArgumentError, 'cannot branch before the first commit' if start_commit_id.nil?
 
       find!(:commits, start_commit_id, 'commit')
       append(:branches, Elements::GitBranch.new(name:, start_commit_id:)).tap { @current_branch_name = it.name }
@@ -37,6 +37,9 @@ module Diagrams
     def merge(from_branch_name:, id: nil, tag: nil)
       source = find!(:branches, from_branch_name, 'branch')
       raise ArgumentError, "cannot merge #{source.name.inspect} into itself" if source.name == current_branch_name
+      if source.head_commit_id == head_id
+        raise ArgumentError, "#{source.name.inspect} and #{current_branch_name.inspect} are both at #{head_id.inspect}"
+      end
 
       add_commit(id:, tag:, type: :MERGE, parent_ids: [head_id, source.head_commit_id],
                  message: "Merge branch '#{source.name}' into #{current_branch_name}",
@@ -62,8 +65,8 @@ module Diagrams
       # order, each as soon as its start commit exists.
       def restore(data, version:)
         new(version:, **data.except(:commits, :branches)).tap do |diagram|
-          pending = data.fetch(:branches, []).reject { it[:name] == diagram.main_branch }
-          data.fetch(:commits, []).each do |commit|
+          pending = records(data, :branches).reject { it[:name] == diagram.main_branch }
+          records(data, :commits).each do |commit|
             open_branches(diagram, pending)
             diagram.checkout(name: commit[:branch_name]) unless diagram.commits.empty?
             replay(diagram, commit)
@@ -78,7 +81,9 @@ module Diagrams
         end
       end
 
-      def recorded(data, name, type) = data.fetch(name, []).map { type.from_h(it) }
+      def recorded(data, name, type) = records(data, name).map { type.from_h(it) }
+
+      def records(data, name) = Check.list(data.fetch(name, []), name).map { Check.record(it, name) }
 
       def open_branches(diagram, pending)
         while (branch = pending.first) && diagram.commits.any? { it.id == branch[:start_commit_id] }
@@ -87,7 +92,7 @@ module Diagrams
       end
 
       def replay(diagram, commit)
-        case commit[:type]&.to_sym
+        case commit[:type].nil? ? :NORMAL : Check.symbol(commit[:type], :type, Elements::GitCommit::TYPES)
         when :MERGE then diagram.merge(from_branch_name: commit[:merge_branch_name], **commit.slice(:id, :tag))
         when :CHERRY_PICK then diagram.cherry_pick(commit_id: commit[:cherry_pick_source_id], id: commit[:id])
         else diagram.commit(**commit.slice(:id, :message, :tag, :type))
@@ -102,7 +107,8 @@ module Diagrams
     def head_id = branches.find { it.name == current_branch_name }&.head_commit_id
 
     def add_commit(id:, **)
-      commit = append(:commits, Elements::GitCommit.new(id: id || next_id, branch_name: current_branch_name, **))
+      commit = append(:commits,
+                      Elements::GitCommit.new(id: id.nil? ? next_id : id, branch_name: current_branch_name, **))
       current = branches.find { it.name == current_branch_name }
       if current
         replace(:branches, current, current.with(head_commit_id: commit.id))

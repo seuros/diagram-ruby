@@ -11,7 +11,7 @@ class ElementsTest < Minitest::Test
     assert_error(TypeError, /identifying must be true or false/) do
       ERDRelationship.new(entity1: 'A', entity2: 'B', cardinality1: :ONE_ONLY, cardinality2: :ONE_ONLY, identifying: 1)
     end
-    assert_error(TypeError, /value must be Numeric, got String/) { Slice.new(label: 'x', value: '1') }
+    assert_error(TypeError, /value must be an Integer or Float, got String/) { Slice.new(label: 'x', value: '1') }
     assert_error(TypeError, /status must be a Symbol/) { task(status: 1) }
   end
 

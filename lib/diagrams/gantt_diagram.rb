@@ -9,7 +9,7 @@ module Diagrams
 
     # +tasks+ are Task values or hashes of their members.
     def add_section(title: nil, tasks: [])
-      open_section(Elements::GanttSection, title, Check.elements(tasks, :tasks, Elements::Task)) { add_task(**it) }
+      open_section(Elements::GanttSection, :tasks, title, Check.elements(tasks, :tasks, Elements::Task))
     end
 
     def add_task(id:, label:, start:, duration:, status: nil)

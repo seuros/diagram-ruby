@@ -13,7 +13,7 @@ module Diagrams
           label: Check.string(label, :label),
           start: Check.string(start, :start),
           duration: Check.string(duration, :duration),
-          status: status && Check.symbol(status, :status, Task::STATUSES)
+          status: status.nil? ? nil : Check.symbol(status, :status, Task::STATUSES)
         )
       end
 

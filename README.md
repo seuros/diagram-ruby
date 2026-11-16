@@ -9,8 +9,9 @@ gem turns these into Mermaid text.
 
 - One way to build each diagram: `new(title:)`, then its `add_*` methods.
 - Elements are immutable `Data` values, compared by value.
-- Wrong types raise `TypeError`; bad values raise `ArgumentError` (`RangeError`
-  for numbers). Loading from a hash runs the same checks.
+- Wrong types raise `TypeError` (`false` is not "absent"); bad values raise
+  `ArgumentError` (`RangeError` for numbers). Numbers are Integers or finite
+  Floats. Loading from a hash or with Marshal runs the same checks.
 - Ruby 4.0+, no dependencies beyond `zeitwerk` and `json`.
 
 ## Installation
@@ -99,8 +100,10 @@ flow.diff(copy)
 
 `version` is yours to manage; it is serialized but is not part of the content,
 the checksum or equality. Loading a hash whose checksum does not match its
-content raises `ArgumentError`. `diff` matches elements by key (id, name,
-label or title) and reports `added`, `removed` and `modified` per collection.
+content raises `ArgumentError`. Equality is strict (`1` and `1.0` differ, as
+they do in the JSON). `diff` matches elements by key (id, name, label or
+title) and reports `added`, `removed` and `modified` per collection; elements
+without a key (edges, transitions, relationships) match by value and count.
 
 ## Development
 

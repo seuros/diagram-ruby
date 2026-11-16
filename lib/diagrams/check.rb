@@ -34,22 +34,31 @@ module Diagrams
       raise ArgumentError, "#{name} must be one of #{allowed.join(', ')}, got #{symbol}"
     end
 
+    # Integer or Float: the numbers JSON carries and reads back as themselves.
     def non_negative(value, name)
-      raise TypeError, "#{name} must be Numeric, got #{value.class}" unless value.is_a?(Numeric)
+      raise TypeError, "#{name} must be an Integer or Float, got #{value.class}" unless value in Integer | Float
       raise RangeError, "#{name} must be finite and >= 0, got #{value}" unless value.finite? && value >= 0
 
       value
     end
 
-    # Child elements, given as elements or as hashes of their members.
+    # Child elements, given as elements or as hashes of their members. Both are
+    # rebuilt through +type+.from_h, so a subclass or an unchecked copy never
+    # gets in.
     def elements(values, name, type)
       list(values, name).map do |value|
         case value
-        when type then value
+        when type then type.from_h(value.to_h)
         when Hash then type.from_h(value)
         else raise TypeError, "#{name} must contain #{type.name} or Hash, got #{value.class}"
         end
       end.freeze
+    end
+
+    def record(value, name)
+      return value if value.is_a?(Hash)
+
+      raise TypeError, "#{name} must be a Hash, got #{value.class}"
     end
 
     def list(values, name)
@@ -61,10 +70,16 @@ module Diagrams
     # Hash keys as symbols, all the way down (JSON gives strings).
     def symbolize(value)
       case value
-      when Hash then value.to_h { |key, item| [key.to_sym, symbolize(item)] }
+      when Hash then value.to_h { |key, item| [symbol_key(key), symbolize(item)] }
       when Array then value.map { symbolize(it) }
       else value
       end
+    end
+
+    def symbol_key(key)
+      return key.to_sym if key in String | Symbol
+
+      raise TypeError, "hash keys must be Strings or Symbols, got #{key.class}"
     end
   end
 end

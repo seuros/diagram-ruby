@@ -12,15 +12,20 @@ module Diagrams
     def self?.non_negative: (untyped value, Symbol name) -> Numeric
     def self?.elements: [T] (untyped values, Symbol name, Class type) -> Array[T]
     def self?.list: (untyped values, Symbol name) -> Array[untyped]
+    def self?.record: (untyped value, Symbol | String name) -> Hash[untyped, untyped]
+    def self?.symbol_key: (untyped key) -> Symbol
     def self?.symbolize: (untyped value) -> untyped
   end
 
   module Element
     module ClassMethods
       def from_h: (Hash[Symbol | String, untyped] hash) -> instance
+      def _load: (String json) -> instance
     end
 
     def key: () -> key?
+    def keyed?: () -> bool
+    def _dump: (Integer level) -> String
     def to_h: () -> Hash[Symbol, untyped]
   end
 
@@ -29,6 +34,7 @@ module Diagrams
     def self.collections: () -> Hash[Symbol, Symbol?]
     def self.from_h: (Hash[Symbol | String, untyped] hash) -> instance
     def self.from_json: (String json) -> instance
+    def self._load: (String json) -> instance
 
     attr_reader title: String?
     attr_reader version: untyped
@@ -38,6 +44,7 @@ module Diagrams
     def checksum: () -> String
     def to_h: () -> { type: String, version: untyped, checksum: String, data: Hash[Symbol, untyped] }
     def to_json: (*untyped) -> String
+    def _dump: (Integer level) -> String
     def ==: (untyped other) -> bool
     def eql?: (untyped other) -> bool
     def hash: () -> Integer

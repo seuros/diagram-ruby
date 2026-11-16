@@ -17,13 +17,14 @@ module Diagrams
       def collections = @collections ||= {}
 
       # Rebuilds a diagram from #to_h output, with string or symbol keys.
-      # Diagrams::Base.from_h accepts any type; a subclass only its own.
+      # Diagrams::Base.from_h accepts any type; a subclass only its own. A
+      # container or key of the wrong class raises TypeError.
       def from_h(hash)
-        hash = Check.symbolize(hash)
+        hash = Check.symbolize(Check.record(hash, :diagram))
         klass = diagram_class(hash[:type])
         return klass.from_h(hash) unless klass.equal?(self)
 
-        data = hash.fetch(:data) { raise ArgumentError, 'diagram hash has no :data' }
+        data = Check.record(hash.fetch(:data) { raise ArgumentError, 'diagram hash has no :data' }, :data)
         diagram = restore(data, version: hash.fetch(:version, 1))
         return diagram if hash[:checksum].nil? || hash[:checksum] == diagram.checksum
 
@@ -32,12 +33,17 @@ module Diagrams
 
       def from_json(json) = from_h(JSON.parse(json))
 
+      # Marshal loads through from_json, so a loaded diagram passes the checks.
+      def _load(json) = from_json(json)
+
       private
 
       # Settings through the constructor, then each element through its add_* method.
       def restore(data, version:)
         new(version:, **data.except(*collections.keys)).tap do |diagram|
-          collections.each { |name, add| data.fetch(name, []).each { diagram.public_send(add, **it) } }
+          collections.each do |name, add|
+            Check.list(data.fetch(name, []), name).each { diagram.public_send(add, **Check.record(it, name)) }
+          end
         end
       end
 
@@ -71,14 +77,19 @@ module Diagrams
 
     def to_json(*) = JSON.generate(to_h, *)
 
-    def ==(other) = other.instance_of?(self.class) && other.content == content
+    def _dump(_level) = to_json
+
+    # Strict: content compares with eql?, so 1 and 1.0 differ, as they do in
+    # the JSON and the checksum, and equal diagrams hash equally.
+    def ==(other) = other.instance_of?(self.class) && other.content.eql?(content)
     alias eql? ==
 
     def hash = [self.class, content].hash
 
-    # Per collection, the elements added, removed and modified in +other+,
-    # matched by Element#key (or whole value when an element has no key).
-    # Collections without changes are left out.
+    # Per collection, the elements added, removed and modified in +other+.
+    # Keyed elements match by Element#key; elements without a key match by
+    # value and count, so each extra copy of an edge shows up once. Collections
+    # without changes are left out.
     def diff(other)
       raise TypeError, "cannot diff #{self.class} with #{other.class}" unless other.instance_of?(self.class)
 
@@ -91,7 +102,7 @@ module Diagrams
     def settings = { title: }
 
     def append(name, element)
-      if element.key && @elements[name].any? { it.key == element.key }
+      if element.keyed? && @elements[name].any? { it.key == element.key }
         raise ArgumentError, "#{element.class.name.split('::').last} #{element.key.inspect} already exists"
       end
 
@@ -105,15 +116,31 @@ module Diagrams
     end
 
     def find!(name, key, noun)
+      Check.string(key, noun)
       @elements[name].find { it.key == key } || raise(ArgumentError, "no #{noun} #{key.inspect}")
     end
 
     def diff_collection(mine, theirs)
-      mine = mine.to_h { [it.key || it, it] }
-      theirs = theirs.to_h { [it.key || it, it] }
-      modified = mine.filter_map { |key, old| { old:, new: theirs[key] } if theirs.key?(key) && theirs[key] != old }
+      sample = mine.first || theirs.first
+      return {} unless sample
+
+      changes = sample.keyed? ? diff_keyed(mine, theirs) : diff_unkeyed(mine, theirs)
+      changes.reject { _2.empty? }
+    end
+
+    def diff_keyed(mine, theirs)
+      mine = mine.to_h { [it.key, it] }
+      theirs = theirs.to_h { [it.key, it] }
+      modified = mine.filter_map { |key, old| { old:, new: theirs[key] } if theirs.key?(key) && !theirs[key].eql?(old) }
       { added: theirs.except(*mine.keys).values, removed: mine.except(*theirs.keys).values, modified: }
-        .reject { _2.empty? }
+    end
+
+    def diff_unkeyed(mine, theirs) = { added: without(theirs, mine), removed: without(mine, theirs) }
+
+    # +list+ minus +other+ as multisets, in the order of +list+.
+    def without(list, other)
+      counts = other.tally
+      list.reject { |item| counts[item].to_i.positive? && (counts[item] -= 1) }
     end
   end
 end

@@ -115,6 +115,10 @@ class BaseTest < Minitest::Test
     assert_equal({ added: new.edges, removed: old.edges }, diff[:edges])
   end
 
+  def test_diff_of_empty_diagrams_is_empty
+    assert_empty Diagrams::FlowchartDiagram.new.diff(Diagrams::FlowchartDiagram.new)
+  end
+
   def test_diff_of_equal_diagrams_is_empty
     assert_empty flowchart.diff(flowchart)
   end
