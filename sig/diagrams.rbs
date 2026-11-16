@@ -103,6 +103,8 @@ module Diagrams
       DAY: Integer
       STEPS: Hash[String, Integer]
       EPOCH: Integer
+      FIRST_YEAR: Integer
+      LAST_YEAR: Integer
 
       def self?.date: (String text) -> Integer
       def self?.valid_date?: (String text) -> bool

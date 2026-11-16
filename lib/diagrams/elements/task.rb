@@ -11,7 +11,7 @@ module Diagrams
     # - +status+: one of Mermaid's task tags.
     # Dates are proleptic Gregorian, as JavaScript's. GanttDiagram checks
     # that after/until name earlier tasks and that every date it computes
-    # stays within years 0000-9999.
+    # stays within years 0100-9999 (see GanttDiagram::Calendar).
     Task = Data.define(:id, :label, :start, :duration, :status) do
       include Element
 

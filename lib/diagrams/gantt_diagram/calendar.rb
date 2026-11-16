@@ -10,13 +10,18 @@ module Diagrams
     # - months and years: the integer part of current + n, from day 1, then
     #   the day clamped to the month's length;
     # - h, m, s, ms: milliseconds added, the sum truncated.
-    # Results must stay within years 0000 to 9999; beyond that Mermaid's
-    # arithmetic stops being exact (and soon silently gives a zero length),
-    # so they are refused.
+    # Dates and results must stay within years 0100 to 9999, where Mermaid's
+    # arithmetic is exact; anything else is refused. Beyond 9999 it stops
+    # being exact (and soon silently gives a zero length). Below 0100 dayjs
+    # builds dates with JavaScript's Date constructor, which reads years 0-99
+    # as 1900-1999: Mermaid then rejects end dates (the task collapses to its
+    # start) and clamps months by the wrong year's February.
     module Calendar
       DAY = 86_400_000
       STEPS = { 'h' => 3_600_000, 'm' => 60_000, 's' => 1000, 'ms' => 1 }.freeze
       EPOCH = Date.new(1970, 1, 1, Date::GREGORIAN).jd
+      FIRST_YEAR = 100
+      LAST_YEAR = 9999
 
       module_function
 
@@ -43,9 +48,9 @@ module Diagrams
       end
 
       def check(time, what)
-        return time if time.between?(from_civil(0, 1, 1), from_civil(9999, 12, 31) + DAY - 1)
+        return time if time.between?(from_civil(FIRST_YEAR, 1, 1), from_civil(LAST_YEAR + 1, 1, 1) - 1)
 
-        raise ArgumentError, "#{what} falls outside years 0000-9999, where Mermaid's dates are exact"
+        raise ArgumentError, "#{what} falls outside years 0100-9999, where Mermaid's dates are exact"
       end
 
       def to_time(time) = Time.at(*time.divmod(1000), :millisecond, in: 'UTC')

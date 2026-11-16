@@ -41,8 +41,9 @@ module Diagrams
       raise ArgumentError, "task #{task.id.inspect} refers to unknown tasks #{unknown.join(', ')}" if unknown.any?
 
       start = moment(task.start, known) { |times| times.map(&:last).max }
+      Calendar.check(start, "task #{task.id.inspect} start")
       finish = moment(task.duration, known, start) { |times| times.map(&:first).min }
-      [Calendar.check(start, "task #{task.id.inspect} start"), Calendar.check(finish, "task #{task.id.inspect} end")]
+      [start, Calendar.check(finish, "task #{task.id.inspect} end")]
     end
 
     # A date, an after/until clause (resolved by the block), or a length.

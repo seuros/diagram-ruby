@@ -92,7 +92,7 @@ class Round3Test < Minitest::Test
     gantt = Diagrams::GanttDiagram.new
 
     ['999999999999999d', "#{'9' * 400}d", '8000y', '120000M'].each do |duration|
-      assert_error(ArgumentError, /falls outside years 0000-9999|beyond Mermaid's dates/) do
+      assert_error(ArgumentError, /falls outside years 0100-9999|beyond Mermaid's dates/) do
         gantt.add_task(id: 't', label: 'T', start: '2026-01-01', duration:)
       end
     end

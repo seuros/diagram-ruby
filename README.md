@@ -95,7 +95,9 @@ Mermaid only warns and overwrites the earlier commit.
 
 Gantt tasks are placed as Mermaid places them (proleptic Gregorian dates,
 Mermaid's length arithmetic, in UTC); `schedule` gives each task's
-`start...finish`, and a task Mermaid could not place exactly is refused.
+`start...finish`, and a task Mermaid could not place exactly is refused. That
+bounds dates to years 0100-9999: Mermaid misreads years 0000-0099 (end dates
+collapse to the start, months clamp by 1900-1999's Februaries).
 
 Gantt tasks and timeline periods go to the last section; one added before any
 section opens an untitled section.
