@@ -2,22 +2,18 @@
 
 module Diagrams
   module Elements
-    # Represents a specific time period on the timeline, containing one or more events.
-    class TimelinePeriod < Dry::Struct
-      include Elements::Types
+    # A timeline period ("2004", "Bronze Age") and its events.
+    TimelinePeriod = Data.define(:label, :events) do
+      include Element
 
-      attribute :label, Types::Strict::String.constrained(min_size: 1)
-      attribute :events, Types::Strict::Array.of(TimelineEvent).constrained(min_size: 1)
+      def initialize(label:, events:)
+        events = Check.strings(events, :events)
+        raise ArgumentError, 'events cannot be empty' if events.empty?
 
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Array<Hash>}]
-      def to_h
-        {
-          label:,
-          events: events.map(&:to_h)
-        }
+        super(label: Check.string(label, :label), events:)
       end
+
+      def key = label
     end
   end
 end

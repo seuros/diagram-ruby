@@ -1,8 +1,3 @@
-inherit_from: .rubocop_todo.yml
-inherit_mode:
-  merge:
-    - Exclude
-
 plugins:  
   - rubocop-minitest
   - rubocop-rake
@@ -29,3 +24,8 @@ Gemspec/DevelopmentDependencies:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*' # Allow longer test classes
+
+
+# Keyword arguments name the element members they set.
+Metrics/ParameterLists:
+  CountKeywordArgs: false

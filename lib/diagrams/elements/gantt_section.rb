@@ -2,22 +2,15 @@
 
 module Diagrams
   module Elements
-    # Represents a section within a Gantt chart, grouping multiple tasks.
-    class GanttSection < Dry::Struct
-      include Elements::Types
+    # A group of Gantt tasks. Only the leading section may be untitled.
+    GanttSection = Data.define(:title, :tasks) do
+      include Element
 
-      attribute :title, Types::Strict::String.constrained(min_size: 1)
-      attribute :tasks, Types::Strict::Array.of(Task).default([].freeze)
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Array<Hash>}]
-      def to_h
-        {
-          title:,
-          tasks: tasks.map(&:to_h)
-        }
+      def initialize(title: nil, tasks: [])
+        super(title: Check.optional_string(title, :title), tasks: Check.elements(tasks, :tasks, Task))
       end
+
+      def key = title
     end
   end
 end

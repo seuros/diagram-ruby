@@ -2,27 +2,22 @@
 
 module Diagrams
   module Elements
-    # Represents an attribute within an ERD entity.
-    class ERDAttribute < Dry::Struct
-      include Elements::Types
+    # An entity attribute: type, name, keys (PK, FK, UK) and an optional comment.
+    ERDAttribute = Data.define(:type, :name, :keys, :comment) do
+      include Element
 
-      attribute :type, Types::Strict::String.constrained(min_size: 1)
-      attribute :name, Types::Strict::String.constrained(min_size: 1)
-      attribute :keys, Types::Strict::Array.of(Types::Strict::Symbol.enum(:PK, :FK, :UK)).default([].freeze)
-      attribute :comment, Types::Strict::String.optional.default(nil)
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Array<Symbol>}]
-      def to_h
-        hash = {
-          type:,
-          name:,
-          keys: keys.map(&:to_s) # Convert symbols to strings for serialization
-        }
-        hash[:comment] = comment if comment
-        hash
+      def initialize(type:, name:, keys: [], comment: nil)
+        super(
+          type: Check.string(type, :type),
+          name: Check.string(name, :name),
+          keys: Check.list(keys, :keys).map { Check.symbol(it, :keys, ERDAttribute::KEYS) }.uniq.freeze,
+          comment: Check.optional_string(comment, :comment)
+        )
       end
+
+      def key = name
     end
+
+    ERDAttribute::KEYS = %i[PK FK UK].freeze
   end
 end

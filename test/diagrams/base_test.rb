@@ -2,140 +2,124 @@
 
 require 'test_helper'
 
-module Diagrams
-  class BaseTest < DiagramTest
-    # Dummy subclass for testing abstract methods
-    class ConcreteDiagram < Base
-      attr_reader :nodes # Add reader for test access if needed
-
-      def initialize(version: 1)
-        super
-        @nodes = [] # Initialize @nodes
-        # update_checksum! will be called after setting nodes in test
-        update_checksum! # Calculate initial checksum
-      end
-
-      # Implement to reflect the @nodes variable used in tests
-      def to_h_content
-        { nodes: (@nodes || []).map(&:to_h) }
-      end
-
-      # Implement identifiable_elements directly
-      def identifiable_elements
-        { nodes: @nodes || [] }
-      end
-
-      # Minimal class-level from_h for testing factory
-      def self.from_h(data_hash, version:, _checksum:)
-        # Simplified for test purposes
-        nodes_data = data_hash[:nodes] || []
-        nodes = nodes_data.map { |h| Elements::Node.new(h.transform_keys(&:to_sym)) }
-        new(version:).tap { |d| d.instance_variable_set(:@nodes, nodes) }
-      end
+class BaseTest < Minitest::Test
+  def flowchart(title: nil)
+    Diagrams::FlowchartDiagram.new(title:).tap do |diagram|
+      diagram.add_node(id: 'A', label: 'Start')
+      diagram.add_node(id: 'B', label: 'End')
+      diagram.add_edge(source_id: 'A', target_id: 'B')
     end
+  end
 
-    def test_initialize_abstract_class
-      # Test that direct instantiation raises error
-      assert_raises NotImplementedError, 'Cannot instantiate abstract class Diagrams::Base' do
-        Diagrams::Base.new
-      end
-    end
+  def test_base_is_abstract
+    assert_raises(NotImplementedError) { Diagrams::Base.new }
+  end
 
-    def test_initialize_concrete_class
-      # Test that concrete subclass can be instantiated
-      diagram = ConcreteDiagram.new(version: 'alpha')
+  def test_type_names
+    assert_equal 'flowchart_diagram', Diagrams::FlowchartDiagram.type
+    assert_equal 'er_diagram', Diagrams::ERDiagram.type
+    assert_equal 'gitgraph_diagram', Diagrams::GitgraphDiagram.type
+  end
 
-      assert_instance_of ConcreteDiagram, diagram
-      assert_equal 'alpha', diagram.version
-      refute_nil diagram.checksum # Checksum should be calculated
-    end
+  def test_title_is_checked
+    assert_equal 'Flow', flowchart(title: 'Flow').title
+    assert_error(TypeError, /title must be a String/) { Diagrams::PieDiagram.new(title: 1) }
+    assert_error(ArgumentError, /title cannot be blank/) { Diagrams::PieDiagram.new(title: ' ') }
+  end
 
-    def test_to_h_content_abstract
-      # Test that calling to_h_content on a base instance (if possible) raises
-      # We need a concrete instance to test this properly
-      diagram = ConcreteDiagram.new
-      # We can't directly test the abstract method on Base,
-      # but we ensure concrete classes *must* implement it.
-      # If ConcreteDiagram didn't implement it, `new` would likely fail,
-      # or calling methods relying on it (like to_h) would fail.
-      # Let's test that to_h works on the concrete class.
-      assert_respond_to diagram, :to_h_content
-      assert_equal({ nodes: [] }, diagram.to_h_content) # Expect nodes array now
-    end
+  def test_to_h
+    hash = flowchart(title: 'Flow').to_h
 
-    def test_to_h_structure
-      diagram = ConcreteDiagram.new(version: 2)
-      expected_hash = {
-        type: 'concrete_diagram',
-        version: 2,
-        checksum: diagram.checksum, # Use the actual checksum
-        data: { nodes: [] } # Expect nodes array now
-      }
+    assert_equal 'flowchart_diagram', hash[:type]
+    assert_equal 1, hash[:version]
+    assert_equal flowchart(title: 'Flow').checksum, hash[:checksum]
+    assert_equal({ title: 'Flow', nodes: [{ id: 'A', label: 'Start' }, { id: 'B', label: 'End' }],
+                   edges: [{ source_id: 'A', target_id: 'B' }] }, hash[:data])
+  end
 
-      assert_equal expected_hash, diagram.to_h
-    end
+  def test_round_trip_keeps_version
+    diagram = Diagrams::FlowchartDiagram.new(version: 'v2')
 
-    def test_to_json
-      diagram = ConcreteDiagram.new(version: 'beta')
-      expected_hash = {
-        type: 'concrete_diagram',
-        version: 'beta',
-        checksum: diagram.checksum,
-        data: { nodes: [] } # Expect nodes array now
-      }
-      expected_json = JSON.generate(expected_hash)
+    assert_equal 'v2', assert_round_trip(diagram).version
+  end
 
-      assert_equal expected_json, diagram.to_json
-    end
+  def test_from_h_accepts_string_keys
+    hash = JSON.parse(flowchart.to_json)
 
-    def test_diff_added_removed
-      diagram1 = ConcreteDiagram.new
-      node_a = Elements::Node.new(id: 'a', label: 'A')
-      node_b = Elements::Node.new(id: 'b', label: 'B')
-      diagram1.instance_variable_set(:@nodes, [node_a]) # Simulate adding node
-      diagram1.send(:update_checksum!) # Use send for protected method
+    assert_equal flowchart, Diagrams::Base.from_h(hash)
+    assert_equal flowchart, Diagrams::FlowchartDiagram.from_h(hash)
+  end
 
-      diagram2 = ConcreteDiagram.new
-      diagram2.instance_variable_set(:@nodes, [node_b]) # Simulate different node
-      diagram2.send(:update_checksum!) # Use send for protected method
+  def test_from_h_rejects_an_unknown_or_other_type
+    assert_error(ArgumentError, /not a known diagram type: "sankey"/) { Diagrams::Base.from_h(type: 'sankey', data: {}) }
+    assert_error(ArgumentError, /not a pie_diagram diagram type/) { Diagrams::PieDiagram.from_h(flowchart.to_h) }
+  end
 
-      # No longer need to override identifiable_elements as it's implemented in ConcreteDiagram
+  def test_from_h_requires_data
+    assert_error(ArgumentError, /no :data/) { Diagrams::Base.from_h(type: 'pie_diagram') }
+  end
 
-      diff_result = diagram1.diff(diagram2)
+  def test_from_h_rejects_a_checksum_mismatch
+    hash = flowchart.to_h.merge(checksum: 'bogus')
 
-      expected_diff = {
-        nodes: {
-          added: [node_b],
-          removed: [node_a]
-          # modified: [] # Basic diff doesn't reliably detect modification yet
-        }
-      }
+    assert_error(ArgumentError, /checksum mismatch/) { Diagrams::Base.from_h(hash) }
+  end
 
-      assert_equal expected_diff, diff_result
-    end
+  def test_from_h_checks_elements_like_add
+    hash = flowchart.to_h.except(:checksum)
+    hash[:data][:edges] << { source_id: 'A', target_id: 'Z' }
 
-    def test_diff_no_change
-      diagram1 = ConcreteDiagram.new
-      node_a = Elements::Node.new(id: 'a', label: 'A')
-      diagram1.instance_variable_set(:@nodes, [node_a])
-      diagram1.send(:update_checksum!) # Use send for protected method
+    assert_error(ArgumentError, /no node "Z"/) { Diagrams::Base.from_h(hash) }
+  end
 
-      diagram2 = ConcreteDiagram.new
-      diagram2.instance_variable_set(:@nodes, [node_a])
-      diagram2.send(:update_checksum!) # Use send for protected method
+  def test_from_json_rejects_invalid_json
+    assert_raises(JSON::ParserError) { Diagrams::Base.from_json('{') }
+  end
 
-      # No longer need to override identifiable_elements
-      diff_result = diagram1.diff(diagram2)
+  def test_equality_follows_type_and_content
+    assert_equal flowchart, flowchart
+    assert_equal flowchart.hash, flowchart.hash
+    assert flowchart.eql?(flowchart)
+    refute_equal flowchart, flowchart(title: 'Other')
+    refute_equal Diagrams::StateDiagram.new, Diagrams::FlowchartDiagram.new
+  end
 
-      assert_empty diff_result
-    end
+  def test_checksum_follows_content_not_version
+    assert_equal flowchart.checksum, Diagrams::FlowchartDiagram.from_h(flowchart.to_h.merge(version: 9)).checksum
+    refute_equal flowchart.checksum, flowchart(title: 'T').checksum
+  end
 
-    def test_diff_different_types
-      ConcreteDiagram.new
-      # Need another concrete type for this test, skip for now
-      # diagram2 = AnotherConcreteDiagram.new
-      # assert_empty diagram1.diff(diagram2)
-      skip 'Need another concrete diagram type to test diff across types.'
-    end
+  def test_collections_are_frozen
+    diagram = flowchart
+
+    assert_predicate diagram.nodes, :frozen?
+    assert_raises(FrozenError) { diagram.nodes << diagram.nodes.first }
+  end
+
+  def test_duplicate_keys_are_rejected
+    assert_error(ArgumentError, /Node "A" already exists/) { flowchart.add_node(id: 'A', label: 'Again') }
+  end
+
+  def test_diff_reports_added_removed_and_modified
+    old = flowchart
+    new = Diagrams::FlowchartDiagram.new
+    new.add_node(id: 'A', label: 'Begin')
+    new.add_node(id: 'C', label: 'Other')
+    new.add_edge(source_id: 'A', target_id: 'C')
+
+    diff = old.diff(new)
+
+    assert_equal [{ old: old.nodes[0], new: new.nodes[0] }], diff[:nodes][:modified]
+    assert_equal [new.nodes[1]], diff[:nodes][:added]
+    assert_equal [old.nodes[1]], diff[:nodes][:removed]
+    assert_equal({ added: new.edges, removed: old.edges }, diff[:edges])
+  end
+
+  def test_diff_of_equal_diagrams_is_empty
+    assert_empty flowchart.diff(flowchart)
+  end
+
+  def test_diff_needs_the_same_type
+    assert_raises(TypeError) { flowchart.diff(Diagrams::StateDiagram.new) }
   end
 end

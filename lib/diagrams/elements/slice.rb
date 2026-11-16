@@ -2,30 +2,15 @@
 
 module Diagrams
   module Elements
-    # Represents a slice in a Pie Diagram.
-    class Slice < Dry::Struct
-      # Use the shared Types module
-      include Elements::Types
+    # A pie chart slice: a label and a non-negative value.
+    Slice = Data.define(:label, :value) do
+      include Element
 
-      attribute :label, Types::Strict::String.constrained(min_size: 1)
-      # Represents the raw value of the slice (not percentage)
-      attribute :value, Types::Coercible::Float.constrained(gteq: 0)
-      # Calculated percentage (read-only)
-      attribute :percentage, Types::Strict::Float.optional.default(nil).meta(reader: true)
-      # Consider adding optional color attribute later.
-      # attribute :color, Types::Strict::String.optional.default(nil)
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Float | nil}]
-      def to_h
-        hash = {
-          label:,
-          value:
-        }
-        hash[:percentage] = percentage if percentage
-        hash
+      def initialize(label:, value:)
+        super(label: Check.string(label, :label), value: Check.non_negative(value, :value))
       end
+
+      def key = label
     end
   end
 end

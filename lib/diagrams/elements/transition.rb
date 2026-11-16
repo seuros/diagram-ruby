@@ -2,29 +2,18 @@
 
 module Diagrams
   module Elements
-    # Represents a transition between two states in a State Diagram.
-    class Transition < Dry::Struct
-      # Use the shared Types module
-      include Elements::Types
+    # A transition between two states, with an optional label, guard and action.
+    Transition = Data.define(:source_state_id, :target_state_id, :label, :guard, :action) do
+      include Element
 
-      # Consider if a transition needs its own ID.
-      # attribute :id, Types::Strict::String
-
-      attribute :source_state_id, Types::Strict::String.constrained(min_size: 1)
-      attribute :target_state_id, Types::Strict::String.constrained(min_size: 1)
-      # Label often represents the event or condition triggering the transition.
-      attribute :label, Types::Strict::String.optional.default(nil)
-      # Guard condition for the transition (e.g., "user.admin?")
-      attribute :guard, Types::Strict::String.optional.default(nil)
-      # Action to execute during the transition (e.g., "send_notification")
-      attribute :action, Types::Strict::String.optional.default(nil)
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | nil}]
-      def to_h
-        # Start with Dry::Struct's hash and drop nil attributes.
-        super.compact
+      def initialize(source_state_id:, target_state_id:, label: nil, guard: nil, action: nil)
+        super(
+          source_state_id: Check.string(source_state_id, :source_state_id),
+          target_state_id: Check.string(target_state_id, :target_state_id),
+          label: Check.optional_string(label, :label),
+          guard: Check.optional_string(guard, :guard),
+          action: Check.optional_string(action, :action)
+        )
       end
     end
   end

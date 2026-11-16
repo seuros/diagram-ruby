@@ -23,9 +23,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.add_dependency 'dry-equalizer', '>= 0.2'
-  spec.add_dependency 'dry-struct', '>= 1.6.0'
-  spec.add_dependency 'dry-types', '>= 1.0'
   spec.add_dependency 'json'
   spec.add_dependency 'zeitwerk', '>= 2.6'
 
@@ -33,10 +30,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '>= 2.5.5'
   spec.add_development_dependency 'minitest', '~> 6.0'
   spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rbs'
   spec.add_development_dependency 'rubocop', '~> 1.59'
   spec.add_development_dependency 'rubocop-minitest', '~> 0.34'
   spec.add_development_dependency 'rubocop-performance', '~> 1.20'
   spec.add_development_dependency 'rubocop-rake', '~> 0.6'
-  spec.add_development_dependency 'steep'
   spec.add_development_dependency 'yard', '~> 0.9'
 end

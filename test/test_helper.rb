@@ -1,23 +1,24 @@
 # frozen_string_literal: true
 
 require 'diagram'
-
 require 'minitest/autorun'
 
-class DiagramTest < Minitest::Test
-  def subject
-    Object.const_get(self.class.name.gsub(/Test$/, ''))
+# Assertions shared by the diagram tests.
+module DiagramAssertions
+  # The diagram survives JSON and comes back equal, with the same checksum.
+  def assert_round_trip(diagram)
+    loaded = Diagrams::Base.from_json(diagram.to_json)
+
+    assert_equal diagram, loaded
+    assert_equal diagram.checksum, loaded.checksum
+    loaded
   end
 
-  def test_class_methods
-    skip if instance_of?(DiagramTest)
+  def assert_error(type, pattern, &)
+    error = assert_raises(type, &)
 
-    assert_respond_to subject, :from_json
-  end
-
-  def deep_stringify_keys(hash)
-    hash.each_with_object({}) do |(key, value), new_hash|
-      new_hash[key.to_s] = value.is_a?(Hash) ? deep_stringify_keys(value) : value
-    end
+    assert_match pattern, error.message
   end
 end
+
+Minitest::Test.include(DiagramAssertions)

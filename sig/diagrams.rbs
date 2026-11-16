@@ -1,0 +1,313 @@
+module Diagrams
+  VERSION: String
+
+  type key = String
+
+  module Check
+    def self?.string: (untyped value, Symbol name) -> String
+    def self?.optional_string: (untyped value, Symbol name) -> String?
+    def self?.strings: (untyped values, Symbol name) -> Array[String]
+    def self?.boolean: (untyped value, Symbol name) -> bool
+    def self?.symbol: (untyped value, Symbol name, Array[Symbol] allowed) -> Symbol
+    def self?.non_negative: (untyped value, Symbol name) -> Numeric
+    def self?.elements: [T] (untyped values, Symbol name, Class type) -> Array[T]
+    def self?.list: (untyped values, Symbol name) -> Array[untyped]
+    def self?.symbolize: (untyped value) -> untyped
+  end
+
+  module Element
+    module ClassMethods
+      def from_h: (Hash[Symbol | String, untyped] hash) -> instance
+    end
+
+    def key: () -> key?
+    def to_h: () -> Hash[Symbol, untyped]
+  end
+
+  class Base
+    def self.type: () -> String
+    def self.collections: () -> Hash[Symbol, Symbol?]
+    def self.from_h: (Hash[Symbol | String, untyped] hash) -> instance
+    def self.from_json: (String json) -> instance
+
+    attr_reader title: String?
+    attr_reader version: untyped
+
+    def initialize: (?title: String?, ?version: untyped) -> void
+    def content: () -> Hash[Symbol, untyped]
+    def checksum: () -> String
+    def to_h: () -> { type: String, version: untyped, checksum: String, data: Hash[Symbol, untyped] }
+    def to_json: (*untyped) -> String
+    def ==: (untyped other) -> bool
+    def eql?: (untyped other) -> bool
+    def hash: () -> Integer
+    def diff: (instance other) -> Hash[Symbol, Hash[Symbol, Array[untyped]]]
+  end
+
+  module Sectioned
+  end
+
+  class FlowchartDiagram < Base
+    def nodes: () -> Array[Elements::Node]
+    def edges: () -> Array[Elements::Edge]
+    def add_node: (id: String, label: String) -> Elements::Node
+    def add_edge: (source_id: String, target_id: String, ?label: String?) -> Elements::Edge
+  end
+
+  class StateDiagram < Base
+    TERMINAL: String
+
+    def states: () -> Array[Elements::State]
+    def transitions: () -> Array[Elements::Transition]
+    def add_state: (id: String, ?label: String?) -> Elements::State
+    def add_transition: (source_state_id: String, target_state_id: String, ?label: String?, ?guard: String?,
+                         ?action: String?) -> Elements::Transition
+  end
+
+  class ClassDiagram < Base
+    def classes: () -> Array[Elements::ClassEntity]
+    def relationships: () -> Array[Elements::Relationship]
+    def add_class: (name: String, ?attributes: Array[String], ?operations: Array[String]) -> Elements::ClassEntity
+    def add_relationship: (source_class_name: String, target_class_name: String, type: Symbol | String,
+                           ?label: String?) -> Elements::Relationship
+  end
+
+  class PieDiagram < Base
+    def slices: () -> Array[Elements::Slice]
+    def add_slice: (label: String, value: Numeric) -> Elements::Slice
+    def total: () -> Numeric
+    def percentages: () -> Hash[String, Float]
+  end
+
+  class ERDiagram < Base
+    def entities: () -> Array[Elements::ERDEntity]
+    def relationships: () -> Array[Elements::ERDRelationship]
+    def add_entity: (name: String, ?attributes: Array[Elements::ERDAttribute | Hash[Symbol, untyped]])
+                    -> Elements::ERDEntity
+    def add_relationship: (entity1: String, entity2: String, cardinality1: Symbol | String,
+                           cardinality2: Symbol | String, ?identifying: bool, ?label: String?)
+                          -> Elements::ERDRelationship
+  end
+
+  class GanttDiagram < Base
+    include Sectioned
+
+    def sections: () -> Array[Elements::GanttSection]
+    def tasks: () -> Array[Elements::Task]
+    def add_section: (?title: String?, ?tasks: Array[Elements::Task | Hash[Symbol, untyped]])
+                     -> Elements::GanttSection
+    def add_task: (id: String, label: String, start: String, duration: String, ?status: (Symbol | String)?)
+                  -> Elements::Task
+  end
+
+  class TimelineDiagram < Base
+    include Sectioned
+
+    def sections: () -> Array[Elements::TimelineSection]
+    def periods: () -> Array[Elements::TimelinePeriod]
+    def add_section: (?title: String?, ?periods: Array[Elements::TimelinePeriod | Hash[Symbol, untyped]])
+                     -> Elements::TimelineSection
+    def add_period: (label: String, events: Array[String]) -> Elements::TimelinePeriod
+  end
+
+  class GitgraphDiagram < Base
+    COMMIT_TYPES: Array[Symbol]
+
+    attr_reader main_branch: String
+    attr_reader current_branch_name: String
+
+    def initialize: (?main_branch: String, ?title: String?, ?version: untyped) -> void
+    def commits: () -> Array[Elements::GitCommit]
+    def branches: () -> Array[Elements::GitBranch]
+    def commit: (?id: String?, ?message: String?, ?tag: String?, ?type: Symbol | String) -> Elements::GitCommit
+    def branch: (name: String, ?start_commit_id: String?) -> Elements::GitBranch
+    def checkout: (name: String) -> String
+    def merge: (from_branch_name: String, ?id: String?, ?tag: String?) -> Elements::GitCommit
+    def cherry_pick: (commit_id: String, ?id: String?) -> Elements::GitCommit
+  end
+
+  module Elements
+    class Node < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader id: String
+      attr_reader label: String
+      def initialize: (id: String, label: String) -> void
+    end
+
+    class Edge < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader source_id: String
+      attr_reader target_id: String
+      attr_reader label: String?
+      def initialize: (source_id: String, target_id: String, ?label: String?) -> void
+    end
+
+    class State < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader id: String
+      attr_reader label: String?
+      def initialize: (id: String, ?label: String?) -> void
+    end
+
+    class Transition < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader source_state_id: String
+      attr_reader target_state_id: String
+      attr_reader label: String?
+      attr_reader guard: String?
+      attr_reader action: String?
+      def initialize: (source_state_id: String, target_state_id: String, ?label: String?, ?guard: String?,
+                       ?action: String?) -> void
+    end
+
+    class ClassEntity < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader name: String
+      attr_reader attributes: Array[String]
+      attr_reader operations: Array[String]
+      def initialize: (name: String, ?attributes: Array[String], ?operations: Array[String]) -> void
+    end
+
+    class Relationship < Data
+      include Element
+      extend Element::ClassMethods
+
+      TYPES: Array[Symbol]
+
+      attr_reader source_class_name: String
+      attr_reader target_class_name: String
+      attr_reader type: Symbol
+      attr_reader label: String?
+      def initialize: (source_class_name: String, target_class_name: String, type: Symbol | String,
+                       ?label: String?) -> void
+    end
+
+    class Slice < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader label: String
+      attr_reader value: Numeric
+      def initialize: (label: String, value: Numeric) -> void
+    end
+
+    class Task < Data
+      include Element
+      extend Element::ClassMethods
+
+      STATUSES: Array[Symbol]
+
+      attr_reader id: String
+      attr_reader label: String
+      attr_reader start: String
+      attr_reader duration: String
+      attr_reader status: Symbol?
+      def initialize: (id: String, label: String, start: String, duration: String, ?status: (Symbol | String)?)
+                      -> void
+    end
+
+    class GanttSection < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader title: String?
+      attr_reader tasks: Array[Task]
+      def initialize: (?title: String?, ?tasks: Array[Task | Hash[Symbol, untyped]]) -> void
+    end
+
+    class TimelinePeriod < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader label: String
+      attr_reader events: Array[String]
+      def initialize: (label: String, events: Array[String]) -> void
+    end
+
+    class TimelineSection < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader title: String?
+      attr_reader periods: Array[TimelinePeriod]
+      def initialize: (?title: String?, ?periods: Array[TimelinePeriod | Hash[Symbol, untyped]]) -> void
+    end
+
+    class ERDAttribute < Data
+      include Element
+      extend Element::ClassMethods
+
+      KEYS: Array[Symbol]
+
+      attr_reader type: String
+      attr_reader name: String
+      attr_reader keys: Array[Symbol]
+      attr_reader comment: String?
+      def initialize: (type: String, name: String, ?keys: Array[Symbol | String], ?comment: String?) -> void
+    end
+
+    class ERDEntity < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader name: String
+      attr_reader attributes: Array[ERDAttribute]
+      def initialize: (name: String, ?attributes: Array[ERDAttribute | Hash[Symbol, untyped]]) -> void
+    end
+
+    class ERDRelationship < Data
+      include Element
+      extend Element::ClassMethods
+
+      CARDINALITIES: Array[Symbol]
+
+      attr_reader entity1: String
+      attr_reader entity2: String
+      attr_reader cardinality1: Symbol
+      attr_reader cardinality2: Symbol
+      attr_reader identifying: bool
+      attr_reader label: String?
+      def initialize: (entity1: String, entity2: String, cardinality1: Symbol | String,
+                       cardinality2: Symbol | String, ?identifying: bool, ?label: String?) -> void
+    end
+
+    class GitCommit < Data
+      include Element
+      extend Element::ClassMethods
+
+      TYPES: Array[Symbol]
+
+      attr_reader id: String
+      attr_reader branch_name: String
+      attr_reader parent_ids: Array[String]
+      attr_reader message: String?
+      attr_reader tag: String?
+      attr_reader type: Symbol
+      attr_reader merge_branch_name: String?
+      attr_reader cherry_pick_source_id: String?
+      def initialize: (id: String, branch_name: String, ?parent_ids: Array[String], ?message: String?,
+                       ?tag: String?, ?type: Symbol | String, ?merge_branch_name: String?,
+                       ?cherry_pick_source_id: String?) -> void
+    end
+
+    class GitBranch < Data
+      include Element
+      extend Element::ClassMethods
+
+      attr_reader name: String
+      attr_reader start_commit_id: String
+      attr_reader head_commit_id: String
+      def initialize: (name: String, start_commit_id: String, ?head_commit_id: String) -> void
+    end
+  end
+end

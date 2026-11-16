@@ -1,171 +1,115 @@
-# Diagrams Gem
+# diagram
 
 [![Gem Version](https://badge.fury.io/rb/diagram.svg)](https://badge.fury.io/rb/diagram)
-<!-- Add badges for Build Status, Code Climate, etc. once CI/analysis is set up -->
 
-**Diagrams** provides Ruby objects for defining and manipulating various diagram types (Flowcharts, Class Diagrams, Gantt Charts, Pie Charts, State Diagrams). It focuses on the *data structure and logic*, allowing other tools or gems to handle rendering (e.g., to Mermaid, Graphviz, etc.).
+Diagrams as plain Ruby data: flowcharts, state, class, ER, Gantt, pie,
+timeline and git graphs. Build them, compare them, diff them, serialize them.
+Rendering is someone else's job: the [mermaid](https://github.com/seuros/mermaid-ruby)
+gem turns these into Mermaid text.
 
-**Key Goals:**
-
-*   **Developer Experience & Extensibility:** Clean API, easy to extend.
-*   **Modern Ruby (4.0+):** Uses modern practices like RBS type signatures and `dry-rb` gems.
-*   **Uniform Capabilities:** Consistent serialization (Hash/JSON), comparison, versioning, and checksums across all diagram types.
-*   **Separation of Concerns:** Core gem handles data only, not rendering or persistence.
+- One way to build each diagram: `new(title:)`, then its `add_*` methods.
+- Elements are immutable `Data` values, compared by value.
+- Wrong types raise `TypeError`; bad values raise `ArgumentError` (`RangeError`
+  for numbers). Loading from a hash runs the same checks.
+- Ruby 4.0+, no dependencies beyond `zeitwerk` and `json`.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
 ```ruby
-gem 'diagram', '~> 0.3.0' # Or appropriate version constraint
-```
-
-And then execute:
-
-```bash
-bundle install
-```
-
-Or install it yourself as:
-
-```bash
-gem install diagram
+gem 'diagram'
 ```
 
 ## Usage
 
-### Creating Diagrams
-
-Require the gem and instantiate specific diagram classes.
-
 ```ruby
 require 'diagram'
 
-# --- Flowchart Example ---
-flowchart = Diagrams::FlowchartDiagram.new(version: '1.0')
+flow = Diagrams::FlowchartDiagram.new(title: 'Deploy')
+flow.add_node(id: 'build', label: 'Build')
+flow.add_node(id: 'ship', label: 'Ship')
+flow.add_edge(source_id: 'build', target_id: 'ship', label: 'green')
 
-# Create nodes (using Diagrams::Elements::Node)
-node1 = Diagrams::Elements::Node.new(id: 'start', label: 'Start Process')
-node2 = Diagrams::Elements::Node.new(id: 'step1', label: 'Do Something')
-node3 = Diagrams::Elements::Node.new(id: 'end', label: 'End Process')
-
-# Add nodes to the diagram
-flowchart.add_node(node1)
-flowchart.add_node(node2)
-flowchart.add_node(node3)
-
-# Create and add edges (using Diagrams::Elements::Edge)
-edge1 = Diagrams::Elements::Edge.new(source_id: 'start', target_id: 'step1')
-edge2 = Diagrams::Elements::Edge.new(source_id: 'step1', target_id: 'end', label: 'Finished')
-flowchart.add_edge(edge1)
-flowchart.add_edge(edge2)
-
-puts "Flowchart Nodes: #{flowchart.nodes.map(&:id)}"
-# => Flowchart Nodes: ["start", "step1", "end"]
-
-# --- Class Diagram Example ---
-class_diagram = Diagrams::ClassDiagram.new(version: 2)
-
-# Create class entities (using Diagrams::Elements::ClassEntity)
-user_class = Diagrams::Elements::ClassEntity.new(
-  name: 'User',
-  attributes: ['id: Integer', 'email: String'],
-  methods: ['authenticate(password: String): Boolean']
-)
-order_class = Diagrams::Elements::ClassEntity.new(
-  name: 'Order',
-  attributes: ['order_id: Integer', 'amount: Float']
-)
-
-# Add classes
-class_diagram.add_class(user_class)
-class_diagram.add_class(order_class)
-
-# Create and add relationships (using Diagrams::Elements::Relationship)
-rel = Diagrams::Elements::Relationship.new(
-  source_class_name: 'User',
-  target_class_name: 'Order',
-  type: 'has_many',
-  label: 'places'
-)
-class_diagram.add_relationship(rel)
-
-puts "Class Diagram Classes: #{class_diagram.classes.map(&:name)}"
-# => Class Diagram Classes: ["User", "Order"]
-
-# --- Pie Chart Example ---
-pie_chart = Diagrams::PieDiagram.new(title: 'Browser Share', version: '2024-Q1')
-
-# Create and add slices (using Diagrams::Elements::Slice)
-slice1 = Diagrams::Elements::Slice.new(label: 'Chrome', value: 65.5)
-slice2 = Diagrams::Elements::Slice.new(label: 'Firefox', value: 15.0)
-slice3 = Diagrams::Elements::Slice.new(label: 'Safari', value: 10.5)
-slice4 = Diagrams::Elements::Slice.new(label: 'Edge', value: 5.0)
-# slice5 = Diagrams::Elements::Slice.new(label: 'Other', value: 4.0) # Total must be <= 100
-
-pie_chart.add_slice(slice1)
-pie_chart.add_slice(slice2)
-pie_chart.add_slice(slice3)
-pie_chart.add_slice(slice4)
-# pie_chart.add_slice(slice5)
-
-puts "Pie Chart Total: #{pie_chart.total_value}%"
-# => Pie Chart Total: 96.0%
-
-# (Examples for Gantt and State diagrams can be added similarly)
+flow.nodes.map(&:id)    # => ["build", "ship"]
+flow.add_edge(source_id: 'ship', target_id: 'pray') # => ArgumentError: no node "pray"
 ```
 
-### Serialization & Deserialization
+Every `add_*` returns the element it added. Collections are frozen arrays.
 
-All diagrams can be serialized to a Hash or JSON string, and deserialized back into objects.
+### The other diagram types
 
 ```ruby
-# Serialization
-flowchart_hash = flowchart.to_h
-flowchart_json = flowchart.to_json
+door = Diagrams::StateDiagram.new(title: 'Door')
+door.add_state(id: 'closed')
+door.add_state(id: 'open', label: 'Open')
+door.add_transition(source_state_id: '*', target_state_id: 'closed') # '*' is the initial/final pseudo-state
+door.add_transition(source_state_id: 'closed', target_state_id: 'open', label: 'push', guard: 'unlocked')
 
-puts flowchart_json
-# => {"type":"FlowchartDiagram","version":"1.0","checksum":"...","data":{"nodes":[...],"edges":[...]}}
+classes = Diagrams::ClassDiagram.new
+classes.add_class(name: 'Animal', attributes: ['+String name'], operations: ['+speak() String'])
+classes.add_class(name: 'Duck')
+classes.add_relationship(source_class_name: 'Animal', target_class_name: 'Duck', type: :inheritance)
 
-# Deserialization (using the Base class factory)
-loaded_flowchart = Diagrams::Base.from_json(flowchart_json)
-# or
-# loaded_flowchart = Diagrams::Base.from_hash(flowchart_hash)
+shop = Diagrams::ERDiagram.new
+shop.add_entity(name: 'CUSTOMER', attributes: [{ type: 'int', name: 'id', keys: [:PK] },
+                                               { type: 'string', name: 'email', keys: [:UK] }])
+shop.add_entity(name: 'ORDER')
+shop.add_relationship(entity1: 'CUSTOMER', entity2: 'ORDER',
+                      cardinality1: :ONE_ONLY, cardinality2: :ZERO_OR_MORE, label: 'places')
 
-puts "Loaded diagram type: #{loaded_flowchart.class}"
-# => Loaded diagram type: Diagrams::FlowchartDiagram
-puts "Loaded diagram version: #{loaded_flowchart.version}"
-# => Loaded diagram version: 1.0
+pets = Diagrams::PieDiagram.new(title: 'Pets')
+pets.add_slice(label: 'Dogs', value: 3)
+pets.add_slice(label: 'Cats', value: 1)
+pets.percentages # => {"Dogs" => 75.0, "Cats" => 25.0}
 
-# Verify content equality (ignores version)
-original_flowchart = Diagrams::FlowchartDiagram.new(
-  nodes: [node1, node2, node3],
-  edges: [edge1, edge2],
-  version: 'Different Version' # Version doesn't affect equality check
-)
-puts "Diagrams have same content? #{loaded_flowchart == original_flowchart}"
-# => Diagrams have same content? true
+plan = Diagrams::GanttDiagram.new(title: 'Launch')
+plan.add_section(title: 'Design')
+plan.add_task(id: 'spec', label: 'Spec', start: '2026-01-05', duration: '3d', status: :done)
+plan.add_section(title: 'Build', tasks: [{ id: 'code', label: 'Code', start: 'after spec', duration: '2w' }])
+
+history = Diagrams::TimelineDiagram.new(title: 'Social media')
+history.add_period(label: '2004', events: %w[Facebook Gmail])
+history.add_section(title: 'Video')
+history.add_period(label: '2005', events: ['YouTube'])
+
+git = Diagrams::GitgraphDiagram.new # main branch "main"
+git.commit(id: 'init')
+git.branch(name: 'feature')
+git.commit(message: 'work')
+git.checkout(name: 'main')
+git.merge(from_branch_name: 'feature', tag: 'v1')
 ```
 
-### Versioning and Checksums
+Gantt tasks and timeline periods go to the last section; one added before any
+section opens an untitled section.
 
-Each diagram has:
+### Serialize, compare, diff
 
-*   `#version`: A user-managed field (passed during initialization) for tracking revisions.
-*   `#checksum`: An automatically calculated SHA256 hash of the diagram's content (nodes, edges, etc.). This changes whenever the content is modified via methods like `add_node`, `add_slice`, etc.
+```ruby
+json = flow.to_json
+# {"type":"flowchart_diagram","version":1,"checksum":"...","data":{"title":"Deploy","nodes":[...],"edges":[...]}}
 
-You can use the checksum to quickly detect if a diagram's content has changed. The `==` operator compares diagrams based on their type and checksum (content), ignoring the `version` field.
+copy = Diagrams::Base.from_json(json)   # or Diagrams::FlowchartDiagram.from_h(flow.to_h)
+copy == flow                            # => true: same type and content
+copy.checksum == flow.checksum          # => true: SHA256 of the content
+
+copy.add_node(id: 'rollback', label: 'Roll back')
+flow.diff(copy)
+# => {nodes: {added: [#<data Diagrams::Elements::Node id="rollback", label="Roll back">]}}
+```
+
+`version` is yours to manage; it is serialized but is not part of the content,
+the checksum or equality. Loading a hash whose checksum does not match its
+content raises `ArgumentError`. `diff` matches elements by key (id, name,
+label or title) and reports `added`, `removed` and `modified` per collection.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bundle exec rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `lib/diagrams/version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/seuros/diagram-ruby.
+```bash
+bundle install
+bundle exec rake        # tests (padded_cell on CRuby) and RuboCop
+bundle exec rake minitest
+```
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+MIT.

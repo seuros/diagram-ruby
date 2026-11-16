@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
-require 'zeitwerk'
 require 'digest'
 require 'json'
-require 'dry-equalizer'
-require 'dry-struct'
+require 'zeitwerk'
 require_relative 'diagrams/version'
 
 loader = Zeitwerk::Loader.for_gem
 loader.ignore("#{__dir__}/diagram.rb")
-# Add inflection for ERDiagram
 loader.inflector.inflect(
   'er_diagram' => 'ERDiagram',
   'erd_entity' => 'ERDEntity',
@@ -17,7 +14,10 @@ loader.inflector.inflect(
   'erd_relationship' => 'ERDRelationship'
 )
 loader.setup
+# Diagrams::Base.from_h finds diagram types among the loaded subclasses.
+loader.eager_load
 
-# This module handles diagrams creation and manipulation.
+# Diagrams as data: build them with add_* methods, compare, diff and
+# serialize them. Renderers (the mermaid gem) turn them into text.
 module Diagrams
 end

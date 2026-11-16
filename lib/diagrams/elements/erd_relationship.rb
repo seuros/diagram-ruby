@@ -2,39 +2,24 @@
 
 module Diagrams
   module Elements
-    # Represents a relationship between two entities in an ER Diagram.
-    class ERDRelationship < Dry::Struct
-      include Elements::Types
+    # A relationship between two entities. +cardinality1+ is how many of
+    # entity1 relate to one entity2, and +cardinality2+ the reverse. An
+    # identifying relationship is drawn solid, a non-identifying one dashed.
+    ERDRelationship = Data.define(:entity1, :entity2, :cardinality1, :cardinality2, :identifying, :label) do
+      include Element
 
-      # Cardinality symbols (Crow's Foot notation mapping)
-      CARDINALITY = Types::Strict::Symbol.enum(
-        :ZERO_OR_ONE,  # |o
-        :ONE_ONLY,     # ||
-        :ZERO_OR_MORE, # }o
-        :ONE_OR_MORE   # }|
-      )
-
-      attribute :entity1, Types::Strict::String.constrained(min_size: 1)
-      attribute :entity2, Types::Strict::String.constrained(min_size: 1)
-      attribute :cardinality1, CARDINALITY # Cardinality of entity1 relative to entity2
-      attribute :cardinality2, CARDINALITY # Cardinality of entity2 relative to entity1
-      attribute :identifying, Types::Strict::Bool.default(false) # Is it an identifying relationship? (solid vs dashed line)
-      attribute :label, Types::Strict::String.optional.default(nil) # Optional action/verb phrase
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Symbol | Bool}]
-      def to_h
-        hash = {
-          entity1: entity1,
-          entity2: entity2,
-          cardinality1: cardinality1.to_s, # Convert symbol to string
-          cardinality2: cardinality2.to_s, # Convert symbol to string
-          identifying: identifying
-        }
-        hash[:label] = label if label
-        hash
+      def initialize(entity1:, entity2:, cardinality1:, cardinality2:, identifying: false, label: nil)
+        super(
+          entity1: Check.string(entity1, :entity1),
+          entity2: Check.string(entity2, :entity2),
+          cardinality1: Check.symbol(cardinality1, :cardinality1, ERDRelationship::CARDINALITIES),
+          cardinality2: Check.symbol(cardinality2, :cardinality2, ERDRelationship::CARDINALITIES),
+          identifying: Check.boolean(identifying, :identifying),
+          label: Check.optional_string(label, :label)
+        )
       end
     end
+
+    ERDRelationship::CARDINALITIES = %i[ZERO_OR_ONE ONE_ONLY ZERO_OR_MORE ONE_OR_MORE].freeze
   end
 end

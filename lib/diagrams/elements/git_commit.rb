@@ -2,34 +2,30 @@
 
 module Diagrams
   module Elements
-    # Represents a commit in a Gitgraph diagram.
-    class GitCommit < Dry::Struct
-      include Elements::Types
+    # A commit on +branch_name+. +parent_ids+ lists the first parent (the
+    # branch's previous head) first. A merge has two parents and names the
+    # branch it merged; a cherry-pick names the commit it copied.
+    GitCommit = Data.define(:id, :branch_name, :parent_ids, :message, :tag, :type,
+                            :merge_branch_name, :cherry_pick_source_id) do
+      include Element
 
-      attribute :id, Types::Strict::String.constrained(min_size: 1)
-      attribute :parent_ids, Types::Strict::Array.of(Types::Strict::String).default([].freeze)
-      attribute :branch_name, Types::Strict::String.constrained(min_size: 1)
-      attribute :message, Types::Strict::String.optional.default(nil)
-      attribute :tag, Types::Strict::String.optional.default(nil)
-      attribute :type, Types::Strict::Symbol.default(:NORMAL).enum(:NORMAL, :REVERSE, :HIGHLIGHT, :MERGE, :CHERRY_PICK)
-      attribute :cherry_pick_source_id, Types::Strict::String.optional.default(nil)
-
-      # Returns a hash representation suitable for serialization.
-      # Optional attributes are included only if they have non-nil values.
-      #
-      # @return [Hash{Symbol => String | Array<String> | Symbol}]
-      def to_h
-        hash = {
-          id:,
-          parent_ids:,
-          branch_name:,
-          type:
-        }
-        hash[:message] = message if message
-        hash[:tag] = tag if tag
-        hash[:cherry_pick_source_id] = cherry_pick_source_id if cherry_pick_source_id
-        hash
+      def initialize(id:, branch_name:, parent_ids: [], message: nil, tag: nil, type: :NORMAL,
+                     merge_branch_name: nil, cherry_pick_source_id: nil)
+        super(
+          id: Check.string(id, :id),
+          branch_name: Check.string(branch_name, :branch_name),
+          parent_ids: Check.strings(parent_ids, :parent_ids),
+          message: Check.optional_string(message, :message),
+          tag: Check.optional_string(tag, :tag),
+          type: Check.symbol(type, :type, GitCommit::TYPES),
+          merge_branch_name: Check.optional_string(merge_branch_name, :merge_branch_name),
+          cherry_pick_source_id: Check.optional_string(cherry_pick_source_id, :cherry_pick_source_id)
+        )
       end
+
+      def key = id
     end
+
+    GitCommit::TYPES = %i[NORMAL REVERSE HIGHLIGHT MERGE CHERRY_PICK].freeze
   end
 end

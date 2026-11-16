@@ -30,4 +30,9 @@ RuboCop::RakeTask.new
 require 'yard'
 YARD::Rake::YardocTask.new
 
-task default: %i[test rubocop]
+desc 'Validate the RBS signatures in sig/'
+task :rbs do
+  sh 'rbs', '-I', 'sig', 'validate'
+end
+
+task default: %i[test rubocop rbs]

@@ -12,8 +12,8 @@ lint:
 lint-fix:
 	bundle exec rubocop -a
 
-typecheck:
-	bundle exec steep check
+sigs:
+	bundle exec rbs -I sig validate
 
 docs:
 	bundle exec yard doc
@@ -24,4 +24,4 @@ console:
 clean:
 	rm -rf doc/ .yardoc/ coverage/
 
-.PHONY: setup test all lint lint-fix typecheck docs console clean
+.PHONY: setup test all lint lint-fix sigs docs console clean

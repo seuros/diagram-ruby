@@ -2,22 +2,15 @@
 
 module Diagrams
   module Elements
-    # Represents a section or age within the timeline, grouping multiple time periods.
-    class TimelineSection < Dry::Struct
-      include Elements::Types
+    # A group of timeline periods. Only the leading section may be untitled.
+    TimelineSection = Data.define(:title, :periods) do
+      include Element
 
-      attribute :title, Types::Strict::String.constrained(min_size: 1)
-      attribute :periods, Types::Strict::Array.of(TimelinePeriod).default([].freeze)
-
-      # Returns a hash representation suitable for serialization.
-      #
-      # @return [Hash{Symbol => String | Array<Hash>}]
-      def to_h
-        {
-          title:,
-          periods: periods.map(&:to_h)
-        }
+      def initialize(title: nil, periods: [])
+        super(title: Check.optional_string(title, :title), periods: Check.elements(periods, :periods, TimelinePeriod))
       end
+
+      def key = title
     end
   end
 end
