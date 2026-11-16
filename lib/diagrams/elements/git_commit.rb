@@ -2,30 +2,29 @@
 
 module Diagrams
   module Elements
-    # A commit on +branch_name+. +parent_ids+ lists the first parent (the
-    # branch's previous head) first. A merge has two parents and names the
-    # branch it merged; a cherry-pick names the commit it copied.
-    GitCommit = Data.define(:id, :branch_name, :parent_ids, :message, :tag, :type,
-                            :merge_branch_name, :cherry_pick_source_id) do
+    # A commit as Mermaid's gitGraph records it: made on +branch+, with
+    # +parents+ (the branch's previous head first; a merge or cherry-pick has
+    # the merged head or picked commit second), +tags+ and a +type+. A merge
+    # may carry the display type it was given as +custom_type+.
+    GitCommit = Data.define(:id, :branch, :parents, :message, :tags, :type, :custom_type) do
       include Element
 
-      def initialize(id:, branch_name:, parent_ids: [], message: nil, tag: nil, type: :NORMAL,
-                     merge_branch_name: nil, cherry_pick_source_id: nil)
+      def initialize(id:, branch:, parents: [], message: nil, tags: [], type: :NORMAL, custom_type: nil)
         super(
           id: Check.string(id, :id),
-          branch_name: Check.string(branch_name, :branch_name),
-          parent_ids: Check.strings(parent_ids, :parent_ids),
+          branch: Check.string(branch, :branch),
+          parents: Check.strings(parents, :parents),
           message: Check.optional_string(message, :message),
-          tag: Check.optional_string(tag, :tag),
+          tags: Check.strings(tags, :tags),
           type: Check.symbol(type, :type, GitCommit::TYPES),
-          merge_branch_name: Check.optional_string(merge_branch_name, :merge_branch_name),
-          cherry_pick_source_id: Check.optional_string(cherry_pick_source_id, :cherry_pick_source_id)
+          custom_type: custom_type.nil? ? nil : Check.symbol(custom_type, :custom_type, GitCommit::DISPLAY_TYPES)
         )
       end
 
       def key = id
     end
 
-    GitCommit::TYPES = %i[NORMAL REVERSE HIGHLIGHT MERGE CHERRY_PICK].freeze
+    GitCommit::DISPLAY_TYPES = %i[NORMAL REVERSE HIGHLIGHT].freeze
+    GitCommit::TYPES = [*GitCommit::DISPLAY_TYPES, :MERGE, :CHERRY_PICK].freeze
   end
 end

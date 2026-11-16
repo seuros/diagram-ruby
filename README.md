@@ -10,8 +10,10 @@ gem turns these into Mermaid text.
 - One way to build each diagram: `new(title:)`, then its `add_*` methods.
 - Elements are immutable `Data` values, compared by value.
 - Wrong types raise `TypeError` (`false` is not "absent"); bad values raise
-  `ArgumentError` (`RangeError` for numbers). Numbers are Integers or finite
-  Floats. Loading from a hash or with Marshal runs the same checks.
+  `ArgumentError` (`RangeError` for numbers). Numbers are finite Floats or
+  Integers up to 2**53 (what a JSON number holds exactly). Loading from a
+  hash runs the same checks. Marshal is refused (`TypeError`): it would
+  rebuild values without them, so use `to_h`/`from_h`.
 - Ruby 4.0+, no dependencies beyond `zeitwerk` and `json`.
 
 ## Installation
@@ -74,11 +76,21 @@ history.add_period(label: '2005', events: ['YouTube'])
 
 git = Diagrams::GitgraphDiagram.new # main branch "main"
 git.commit(id: 'init')
-git.branch(name: 'feature')
-git.commit(message: 'work')
+git.branch(name: 'feature', order: 1)
+git.commit(message: 'work', tags: ['wip'])
 git.checkout(name: 'main')
-git.merge(from_branch_name: 'feature', tag: 'v1')
+git.commit(id: 'fix', type: :HIGHLIGHT)
+git.merge(branch: 'feature', tags: ['v1'])
+git.checkout(name: 'feature')
+git.cherry_pick(commit_id: 'fix') # tagged "cherry-pick:fix"
 ```
+
+The git graph speaks Mermaid's gitGraph: the same statements and options
+(`commit` id, message, tags, type; `branch` order; `checkout`; `merge` branch,
+id, tags, type; `cherry_pick` commit, parent, tags), applied with the same
+refusals. Its content is that program. Like Mermaid, a cherry-pick gets an id
+the program cannot name, so a cherry-pick is never picked again or named as a
+parent.
 
 Gantt tasks and timeline periods go to the last section; one added before any
 section opens an untitled section.
@@ -98,7 +110,7 @@ flow.diff(copy)
 # => {nodes: {added: [#<data Diagrams::Elements::Node id="rollback", label="Roll back">]}}
 ```
 
-`version` is yours to manage; it is serialized but is not part of the content,
+`version` (a String, Integer or nil) is yours to manage; it is serialized but is not part of the content,
 the checksum or equality. Loading a hash whose checksum does not match its
 content raises `ArgumentError`. Equality is strict (`1` and `1.0` differ, as
 they do in the JSON). `diff` matches elements by key (id, name, label or

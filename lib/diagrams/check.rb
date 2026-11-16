@@ -34,12 +34,28 @@ module Diagrams
       raise ArgumentError, "#{name} must be one of #{allowed.join(', ')}, got #{symbol}"
     end
 
-    # Integer or Float: the numbers JSON carries and reads back as themselves.
+    # Integers beyond 2**53 are not held exactly by a JSON number as most
+    # readers (JavaScript, so Mermaid) parse it: an IEEE double.
+    EXACT_INTEGER = 2**53
+
+    # Integer (up to 2**53) or finite Float: the numbers JSON carries and
+    # reads back exactly.
     def non_negative(value, name)
       raise TypeError, "#{name} must be an Integer or Float, got #{value.class}" unless value in Integer | Float
       raise RangeError, "#{name} must be finite and >= 0, got #{value}" unless value.finite? && value >= 0
+      if value.is_a?(Integer) && value > EXACT_INTEGER
+        raise RangeError, "#{name} must be at most 2**53 to stay exact in a JSON number, got #{value}"
+      end
 
       value
+    end
+
+    # A diagram version: a String, an Integer or nil, which JSON (and so
+    # from_h) give back unchanged.
+    def version(value)
+      return value if value.nil? || value.is_a?(Integer) || value.is_a?(String)
+
+      raise TypeError, "version must be a String, Integer or nil, got #{value.class}"
     end
 
     # Child elements, given as elements or as hashes of their members. Both are

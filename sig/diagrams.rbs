@@ -9,7 +9,10 @@ module Diagrams
     def self?.strings: (untyped values, Symbol name) -> Array[String]
     def self?.boolean: (untyped value, Symbol name) -> bool
     def self?.symbol: (untyped value, Symbol name, Array[Symbol] allowed) -> Symbol
-    def self?.non_negative: (untyped value, Symbol name) -> Numeric
+    EXACT_INTEGER: Integer
+
+    def self?.non_negative: (untyped value, Symbol name) -> (Integer | Float)
+    def self?.version: (untyped value) -> (String | Integer | nil)
     def self?.elements: [T] (untyped values, Symbol name, Class type) -> Array[T]
     def self?.list: (untyped values, Symbol name) -> Array[untyped]
     def self?.record: (untyped value, Symbol | String name) -> Hash[untyped, untyped]
@@ -20,7 +23,6 @@ module Diagrams
   module Element
     module ClassMethods
       def from_h: (Hash[Symbol | String, untyped] hash) -> instance
-      def _load: (String json) -> instance
     end
 
     def key: () -> key?
@@ -34,12 +36,11 @@ module Diagrams
     def self.collections: () -> Hash[Symbol, Symbol?]
     def self.from_h: (Hash[Symbol | String, untyped] hash) -> instance
     def self.from_json: (String json) -> instance
-    def self._load: (String json) -> instance
 
     attr_reader title: String?
-    attr_reader version: untyped
+    attr_reader version: String | Integer | nil
 
-    def initialize: (?title: String?, ?version: untyped) -> void
+    def initialize: (?title: String?, ?version: String | Integer | nil) -> void
     def content: () -> Hash[Symbol, untyped]
     def checksum: () -> String
     def to_h: () -> { type: String, version: untyped, checksum: String, data: Hash[Symbol, untyped] }
@@ -118,19 +119,25 @@ module Diagrams
   end
 
   class GitgraphDiagram < Base
-    COMMIT_TYPES: Array[Symbol]
+    module Refusals
+    end
+
+    include Refusals
+
+    COMMANDS: Array[Symbol]
 
     attr_reader main_branch: String
-    attr_reader current_branch_name: String
+    attr_reader current_branch: String
+    attr_reader statements: Array[Hash[Symbol, untyped]]
 
-    def initialize: (?main_branch: String, ?title: String?, ?version: untyped) -> void
+    def initialize: (?main_branch: String, ?title: String?, ?version: String | Integer | nil) -> void
     def commits: () -> Array[Elements::GitCommit]
     def branches: () -> Array[Elements::GitBranch]
-    def commit: (?id: String?, ?message: String?, ?tag: String?, ?type: Symbol | String) -> Elements::GitCommit
-    def branch: (name: String, ?start_commit_id: String?) -> Elements::GitBranch
-    def checkout: (name: String) -> String
-    def merge: (from_branch_name: String, ?id: String?, ?tag: String?) -> Elements::GitCommit
-    def cherry_pick: (commit_id: String, ?id: String?) -> Elements::GitCommit
+    def commit: (?id: String?, ?message: String?, ?tags: Array[String], ?type: Symbol | String) -> Elements::GitCommit
+    def branch: (name: String, ?order: Integer?) -> Elements::GitBranch
+    def checkout: (name: String) -> Elements::GitBranch
+    def merge: (branch: String, ?id: String?, ?tags: Array[String], ?type: (Symbol | String)?) -> Elements::GitCommit
+    def cherry_pick: (commit_id: String, ?parent: String?, ?tags: Array[String]) -> Elements::GitCommit
   end
 
   module Elements
@@ -213,6 +220,17 @@ module Diagrams
       extend Element::ClassMethods
 
       STATUSES: Array[Symbol]
+      TAGS: Array[String]
+      WORD_SOURCE: String
+      WORD: Regexp
+      DATE: Regexp
+      LENGTH: Regexp
+      CLAUSE: Regexp
+
+      def self.identifier: (untyped id) -> String
+      def self.syntax: (String value, Symbol name, String clause, *Regexp forms) -> String
+      def self.date?: (String value) -> bool
+      def self.clause_ids_ok?: (String value) -> bool
 
       attr_reader id: String
       attr_reader label: String
@@ -221,6 +239,7 @@ module Diagrams
       attr_reader status: Symbol?
       def initialize: (id: String, label: String, start: String, duration: String, ?status: (Symbol | String)?)
                       -> void
+      def references: () -> Array[String]
     end
 
     class GanttSection < Data
@@ -292,19 +311,18 @@ module Diagrams
       include Element
       extend Element::ClassMethods
 
+      DISPLAY_TYPES: Array[Symbol]
       TYPES: Array[Symbol]
 
       attr_reader id: String
-      attr_reader branch_name: String
-      attr_reader parent_ids: Array[String]
+      attr_reader branch: String
+      attr_reader parents: Array[String]
       attr_reader message: String?
-      attr_reader tag: String?
+      attr_reader tags: Array[String]
       attr_reader type: Symbol
-      attr_reader merge_branch_name: String?
-      attr_reader cherry_pick_source_id: String?
-      def initialize: (id: String, branch_name: String, ?parent_ids: Array[String], ?message: String?,
-                       ?tag: String?, ?type: Symbol | String, ?merge_branch_name: String?,
-                       ?cherry_pick_source_id: String?) -> void
+      attr_reader custom_type: Symbol?
+      def initialize: (id: String, branch: String, ?parents: Array[String], ?message: String?, ?tags: Array[String],
+                       ?type: Symbol | String, ?custom_type: (Symbol | String)?) -> void
     end
 
     class GitBranch < Data
@@ -312,9 +330,9 @@ module Diagrams
       extend Element::ClassMethods
 
       attr_reader name: String
-      attr_reader start_commit_id: String
-      attr_reader head_commit_id: String
-      def initialize: (name: String, start_commit_id: String, ?head_commit_id: String) -> void
+      attr_reader order: Integer?
+      attr_reader head_commit_id: String?
+      def initialize: (name: String, ?order: Integer?, ?head_commit_id: String?) -> void
     end
   end
 end

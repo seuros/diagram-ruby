@@ -86,8 +86,8 @@ class ElementsTest < Minitest::Test
     end
   end
 
-  def test_git_branch_head_defaults_to_start
-    assert_equal 'C1', GitBranch.new(name: 'main', start_commit_id: 'C1').head_commit_id
+  def test_git_branch_starts_without_head_or_order
+    assert_equal [nil, nil], GitBranch.new(name: 'main').to_h.values_at(:order, :head_commit_id)
   end
 
   private

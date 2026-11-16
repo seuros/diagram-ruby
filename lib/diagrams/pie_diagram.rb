@@ -9,7 +9,7 @@ module Diagrams
     # refused with RangeError.
     def add_slice(label:, value:)
       slice = Elements::Slice.new(label:, value:)
-      raise RangeError, 'the total of the slices must stay finite' unless (total + slice.value).finite?
+      raise RangeError, 'the total of the slices must stay finite' unless (total + slice.value).to_f.finite?
 
       append(:slices, slice)
     end

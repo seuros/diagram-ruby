@@ -33,9 +33,6 @@ module Diagrams
 
       def from_json(json) = from_h(JSON.parse(json))
 
-      # Marshal loads through from_json, so a loaded diagram passes the checks.
-      def _load(json) = from_json(json)
-
       private
 
       # Settings through the constructor, then each element through its add_* method.
@@ -64,7 +61,7 @@ module Diagrams
       raise NotImplementedError, "#{self.class} is abstract" if instance_of?(Base)
 
       @title = Check.optional_string(title, :title)
-      @version = version
+      @version = Check.version(version)
       @elements = self.class.collections.keys.to_h { [it, [].freeze] }
     end
 
@@ -77,7 +74,9 @@ module Diagrams
 
     def to_json(*) = JSON.generate(to_h, *)
 
-    def _dump(_level) = to_json
+    # Marshal would rebuild a diagram without its checks; use to_h/from_h or
+    # to_json/from_json.
+    def _dump(_level) = raise(TypeError, "#{self.class} cannot be marshalled; use to_h and from_h")
 
     # Strict: content compares with eql?, so 1 and 1.0 differ, as they do in
     # the JSON and the checksum, and equal diagrams hash equally.

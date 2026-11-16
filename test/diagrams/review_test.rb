@@ -12,7 +12,7 @@ class ReviewTest < Minitest::Test
     git.checkout(name: 'main')
     before = git.to_h
 
-    assert_error(ArgumentError, /"dev" and "main" are both at "A"/) { git.merge(from_branch_name: 'dev') }
+    assert_error(ArgumentError, /"dev" and "main" are both at "A"/) { git.merge(branch: 'dev') }
     assert_equal before, git.to_h
   end
 
@@ -66,18 +66,18 @@ class ReviewTest < Minitest::Test
 
   # 10: false is a value of the wrong type, never "absent".
   def test_false_is_a_type_error
-    assert_raises(TypeError) { Diagrams::Elements::Task.new(id: 't', label: 'T', start: 's', duration: 'd', status: false) }
-    task = Diagrams::Elements::Task.new(id: 't', label: 'T', start: 's', duration: 'd')
+    assert_raises(TypeError) { Diagrams::Elements::Task.new(id: 't', label: 'T', start: '2026-01-01', duration: '1d', status: false) }
+    task = Diagrams::Elements::Task.new(id: 't', label: 'T', start: '2026-01-01', duration: '1d')
     assert_raises(TypeError) { task.with(status: false) }
     git = Diagrams::GitgraphDiagram.new
     assert_raises(TypeError) { git.commit(id: false) }
     git.commit(id: 'A')
-    assert_raises(TypeError) { git.branch(name: 'x', start_commit_id: false) }
+    assert_raises(TypeError) { git.branch(name: 'x', order: false) }
     assert_raises(TypeError) { git.checkout(name: false) }
     git.branch(name: 'dev')
     git.commit(id: 'D')
     git.checkout(name: 'main')
-    assert_raises(TypeError) { git.merge(from_branch_name: 'dev', id: false) }
+    assert_raises(TypeError) { git.merge(branch: 'dev', id: false) }
   end
 
   # 11: malformed input raises TypeError (wrong container or key type) or
@@ -86,28 +86,75 @@ class ReviewTest < Minitest::Test
     [nil, [], 'x', { 17 => 'x' }, { type: 'state_diagram', data: nil },
      { type: 'state_diagram', data: { states: nil } }, { type: 'state_diagram', data: { states: ['idle'] } },
      { type: 'state_diagram', data: { states: [{ 1 => 'idle' }] } },
-     { type: 'gitgraph_diagram', data: { branches: [nil] } }].each do |input|
+     { type: 'gitgraph_diagram', data: { statements: [nil] } }].each do |input|
       assert_raises(TypeError, input.inspect) { Diagrams::Base.from_h(input) }
     end
     assert_raises(ArgumentError) { Diagrams::Base.from_h(type: 'state_diagram') }
   end
 
-  # 12: Marshal goes through the checked path and yields frozen values.
-  def test_marshal_rebuilds_elements_through_the_checks
-    attribute = Marshal.load(Marshal.dump(Diagrams::Elements::ERDAttribute.new(type: 'int', name: 'id')))
+  # 12 (round 2): Marshal would rebuild values without their checks, and old
+  # native records load without any hook, so Marshal is refused outright.
+  def test_marshal_is_refused
+    flow = Diagrams::FlowchartDiagram.new
+    attribute = Diagrams::Elements::ERDAttribute.new(type: 'int', name: 'id')
 
-    assert_predicate attribute.name, :frozen?
-    assert_raises(FrozenError) { attribute.name.clear }
+    assert_error(TypeError, /FlowchartDiagram cannot be marshalled; use to_h and from_h/) { Marshal.dump(flow) }
+    assert_error(TypeError, /ERDAttribute cannot be marshalled/) { Marshal.dump(attribute) }
   end
 
-  def test_marshal_rebuilds_diagrams
-    flow = Diagrams::FlowchartDiagram.new(title: 'F', version: 3)
-    flow.add_node(id: 'a', label: 'A')
-    copy = Marshal.load(Marshal.dump(flow))
+  # Round 2: version is a String, Integer or nil, which round-trip unchanged.
+  def test_version_domain
+    %w[v1].push(3, nil).each do |version|
+      diagram = Diagrams::PieDiagram.new(version:)
 
-    assert_equal flow, copy
-    assert_equal 3, copy.version
-    assert_predicate copy.nodes.first.label, :frozen?
+      assert_equal [version], [Diagrams::Base.from_json(diagram.to_json).version]
+    end
+    [:v1, { 'major' => 1 }, 1.5].each do |version|
+      assert_raises(TypeError) { Diagrams::PieDiagram.new(version:) }
+    end
+  end
+
+  # Round 2: integers a JSON number (an IEEE double) cannot hold exactly.
+  def test_integers_beyond_two_to_the_53_are_refused
+    assert_equal 2**53, Diagrams::Elements::Slice.new(label: 'x', value: 2**53).value
+    [(2**53) + 1, 10**400].each do |value|
+      assert_error(RangeError, /at most 2\*\*53/) { Diagrams::Elements::Slice.new(label: 'x', value:) }
+    end
+  end
+
+  # Round 2: Gantt tasks take the forms Mermaid evaluates.
+  def test_gantt_tasks_take_mermaid_forms
+    task = ->(**override) { Diagrams::Elements::Task.new(id: 't', label: 'T', start: '2026-01-01', duration: '1d', **override) }
+
+    assert_error(ArgumentError, /id must be a word/) { task.call(id: 'a b') }
+    %w[done active crit milestone vert].each do |id|
+      assert_error(ArgumentError, /is a Mermaid task tag/) { task.call(id:) }
+    end
+    ['not-a-date', ' 2026-01-01', '2026-02-30', 'active', 'after done'].each do |start|
+      assert_error(ArgumentError, /start .* is not a form Mermaid evaluates/) { task.call(start:) }
+    end
+    ['bad', '1d ', '1d:2d', '0x'].each do |duration|
+      assert_error(ArgumentError, /duration .* is not a form Mermaid evaluates/) { task.call(duration:) }
+    end
+    assert_equal %w[a b c], task.call(start: 'after a b', duration: 'until c').references
+    assert task.call(duration: '2026-02-01') && task.call(duration: '1.5h') && task.call(duration: '250ms')
+  end
+
+  def test_gantt_dependencies_name_earlier_tasks
+    gantt = Diagrams::GanttDiagram.new
+    gantt.add_task(id: 'a', label: 'A', start: '2026-01-01', duration: '1d')
+
+    assert_error(ArgumentError, /refers to unknown tasks b/) do
+      gantt.add_task(id: 'c', label: 'C', start: 'after a b', duration: '1d')
+    end
+    assert_error(ArgumentError, /refers to unknown tasks z/) do
+      gantt.add_section(title: 'S', tasks: [{ id: 'y', label: 'Y', start: 'after z', duration: '1d' },
+                                            { id: 'z', label: 'Z', start: 'after a', duration: '1d' }])
+    end
+    gantt.add_section(title: 'S', tasks: [{ id: 'z', label: 'Z', start: 'after a', duration: '1d' },
+                                          { id: 'y', label: 'Y', start: 'after z', duration: 'until a' }])
+
+    assert_equal %w[a z y], gantt.tasks.map(&:id)
   end
 
   def test_nested_elements_are_rebuilt_not_trusted

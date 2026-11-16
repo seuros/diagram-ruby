@@ -3,8 +3,7 @@
 module Diagrams
   # Behaviour shared by every element. Elements are Data values: built from
   # keywords, checked on construction (and by #with), compared by value.
-  # Marshal goes through the same checks: an element dumps its members as
-  # JSON and loads by rebuilding itself from them.
+  # Elements refuse Marshal, which would bypass the checks.
   module Element
     def self.included(base) = base.extend(ClassMethods)
 
@@ -12,8 +11,6 @@ module Diagrams
     module ClassMethods
       # Builds the element from a hash of its members (string or symbol keys).
       def from_h(hash) = new(**Check.symbolize(Check.record(hash, name)))
-
-      def _load(json) = from_h(JSON.parse(json))
     end
 
     # The element's identity within its collection. Elements without a key
@@ -26,7 +23,8 @@ module Diagrams
     # Members as plain data, nested elements included, nil members left out.
     def to_h = super.filter_map { |name, value| [name, dump(value)] unless value.nil? }.to_h
 
-    def _dump(_level) = JSON.generate(to_h)
+    # Marshal would rebuild an element without its checks; use to_h/from_h.
+    def _dump(_level) = raise(TypeError, "#{self.class} cannot be marshalled; use to_h and from_h")
 
     private
 
