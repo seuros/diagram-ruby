@@ -108,7 +108,7 @@ class GitgraphDiagramTest < Minitest::Test
     assert_error(ArgumentError, /GitBranch "develop" already exists/) { @diagram.branch(name: 'develop') }
     assert_error(ArgumentError, /no branch "nope"/) { @diagram.checkout(name: 'nope') }
     assert_error(ArgumentError, /type must be one of NORMAL, REVERSE, HIGHLIGHT/) { @diagram.commit(type: :MERGE) }
-    assert_error(RangeError, /order must be >= 0/) { @diagram.branch(name: 'x', order: -1) }
+    assert_error(RangeError, /order must be between 0 and 2\*\*53/) { @diagram.branch(name: 'x', order: -1) }
     assert_error(TypeError, /order must be an Integer/) { @diagram.branch(name: 'x', order: '1') }
   end
 

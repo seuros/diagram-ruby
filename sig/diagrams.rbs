@@ -12,6 +12,7 @@ module Diagrams
     EXACT_INTEGER: Integer
 
     def self?.non_negative: (untyped value, Symbol name) -> (Integer | Float)
+    def self?.integer: (untyped value, Symbol name) -> Integer
     def self?.version: (untyped value) -> (String | Integer | nil)
     def self?.elements: [T] (untyped values, Symbol name, Class type) -> Array[T]
     def self?.list: (untyped values, Symbol name) -> Array[untyped]
@@ -98,6 +99,25 @@ module Diagrams
   end
 
   class GanttDiagram < Base
+    module Calendar
+      DAY: Integer
+      STEPS: Hash[String, Integer]
+      EPOCH: Integer
+
+      def self?.date: (String text) -> Integer
+      def self?.valid_date?: (String text) -> bool
+      def self?.add: (Integer time, String length) -> Integer
+      def self?.check: (Integer time, String what) -> Integer
+      def self?.to_time: (Integer time) -> Time
+      def self?.round: (Float number) -> Integer
+      def self?.shift_month: (Integer time, Float number) -> Integer
+      def self?.shift_year: (Integer time, Float number) -> Integer
+      def self?.clamp: (Integer year, Integer month, Integer day, Integer rest) -> Integer
+      def self?.civil: (Integer time) -> [Integer, Integer, Integer, Integer]
+      def self?.from_civil: (Integer year, Integer month, Integer day) -> Integer
+    end
+
+    def schedule: () -> Hash[String, Range[Time]]
     include Sectioned
 
     def sections: () -> Array[Elements::GanttSection]
@@ -221,6 +241,7 @@ module Diagrams
 
       STATUSES: Array[Symbol]
       TAGS: Array[String]
+      OBJECT_NAMES: Array[String]
       WORD_SOURCE: String
       WORD: Regexp
       DATE: Regexp

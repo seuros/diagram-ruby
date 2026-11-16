@@ -90,7 +90,12 @@ The git graph speaks Mermaid's gitGraph: the same statements and options
 id, tags, type; `cherry_pick` commit, parent, tags), applied with the same
 refusals. Its content is that program. Like Mermaid, a cherry-pick gets an id
 the program cannot name, so a cherry-pick is never picked again or named as a
-parent.
+parent. One deliberate difference: a commit id already in use is refused, where
+Mermaid only warns and overwrites the earlier commit.
+
+Gantt tasks are placed as Mermaid places them (proleptic Gregorian dates,
+Mermaid's length arithmetic, in UTC); `schedule` gives each task's
+`start...finish`, and a task Mermaid could not place exactly is refused.
 
 Gantt tasks and timeline periods go to the last section; one added before any
 section opens an untitled section.

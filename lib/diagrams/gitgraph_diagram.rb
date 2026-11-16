@@ -11,6 +11,10 @@ module Diagrams
   # an id the program cannot name: here it is generated, never written to
   # Mermaid, and a cherry-pick is therefore never picked or named as a
   # parent.
+  #
+  # One deliberate difference: a commit id already in use is refused
+  # (ArgumentError). Mermaid only logs a warning and overwrites the earlier
+  # commit, which corrupts the graph it draws.
   class GitgraphDiagram < Base
     include Refusals
 
@@ -34,7 +38,7 @@ module Diagrams
       type = Check.symbol(type, :type, Elements::GitCommit::DISPLAY_TYPES)
       tags = Check.strings(tags, :tags)
       commit = add_commit(id:, message:, tags:, type:, parents: [head_id].compact)
-      record(command: :commit, id: commit.id, message:, tags:, type:)
+      record(command: :commit, id: commit.id, message: commit.message, tags: commit.tags, type: commit.type)
       commit
     end
 
@@ -42,7 +46,7 @@ module Diagrams
     def branch(name:, order: nil)
       branch = append(:branches, Elements::GitBranch.new(name:, order:, head_commit_id: head_id))
       @current_branch = branch.name
-      record(command: :branch, name:, order:)
+      record(command: :branch, name: branch.name, order: branch.order)
       branch
     end
 
@@ -50,13 +54,13 @@ module Diagrams
     def checkout(name:)
       branch = find!(:branches, name, 'branch')
       @current_branch = branch.name
-      record(command: :checkout, name:)
+      record(command: :checkout, name: branch.name)
       branch
     end
 
     # Mermaid: merge <branch> id: tag: type: — refusals in Mermaid's order.
     def merge(branch:, id: nil, tags: [], type: nil)
-      Check.string(branch, :branch)
+      branch = Check.string(branch, :branch)
       tags = Check.strings(tags, :tags)
       type = Check.symbol(type, :type, Elements::GitCommit::DISPLAY_TYPES) unless type.nil?
       current = commit_at(head_id)
@@ -65,7 +69,7 @@ module Diagrams
 
       commit = add_commit(id:, tags:, type: :MERGE, custom_type: type, parents: [current.id, other.id],
                           message: "merged branch #{branch} into #{current_branch}")
-      record(command: :merge, branch:, id: commit.id, tags:, type:)
+      record(command: :merge, branch:, id: commit.id, tags: commit.tags, type:)
       commit
     end
 
@@ -76,13 +80,14 @@ module Diagrams
     def cherry_pick(commit_id:, parent: nil, tags: [])
       source = find!(:commits, commit_id, 'commit')
       tags = Check.strings(tags, :tags)
+      parent = Check.string(parent, :parent) unless parent.nil?
       refuse_cherry_pick(source, parent)
 
       default = "cherry-pick:#{source.id}#{"|parent:#{parent}" if source.type == :MERGE}"
       message = "cherry-picked #{source.message} into #{current_branch}"
       commit = add_commit(id: nil, tags: tags.empty? ? [default] : tags, type: :CHERRY_PICK,
                           parents: [head_id, source.id], message:)
-      record(command: :cherry_pick, commit_id:, parent:, tags:)
+      record(command: :cherry_pick, commit_id: source.id, parent:, tags:)
       commit
     end
 
@@ -108,6 +113,8 @@ module Diagrams
 
     def settings = { **super, main_branch: }
 
+    # Statements hold only frozen values the checks returned or the elements
+    # hold, never the caller's objects.
     def record(**statement)
       statement = statement.reject { |_, value| value.nil? || value == [] }.freeze
       @statements = [*@statements, statement].freeze

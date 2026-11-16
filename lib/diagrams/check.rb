@@ -11,7 +11,7 @@ module Diagrams
       raise TypeError, "#{name} must be a String, got #{value.class}" unless value.is_a?(String)
       raise ArgumentError, "#{name} cannot be blank" if value.strip.empty?
 
-      -value
+      -String.new(value)
     end
 
     def optional_string(value, name) = value.nil? ? nil : string(value, name)
@@ -50,10 +50,20 @@ module Diagrams
       value
     end
 
+    # A whole number JSON (and JavaScript) holds exactly: 0..2**53.
+    def integer(value, name)
+      raise TypeError, "#{name} must be an Integer, got #{value.class}" unless value.is_a?(Integer)
+      raise RangeError, "#{name} must be between 0 and 2**53, got #{value}" unless value.between?(0, EXACT_INTEGER)
+
+      value
+    end
+
     # A diagram version: a String, an Integer or nil, which JSON (and so
     # from_h) give back unchanged.
     def version(value)
-      return value if value.nil? || value.is_a?(Integer) || value.is_a?(String)
+      return value if value.nil?
+      return integer(value, :version) if value.is_a?(Integer)
+      return -String.new(value) if value.is_a?(String)
 
       raise TypeError, "version must be a String, Integer or nil, got #{value.class}"
     end
