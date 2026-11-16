@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.0](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.5...diagram/v0.4.0) (2026-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* gitgraph speaks Mermaid's gitGraph; exact numbers, Mermaid gantt forms, no Marshal
+* Data elements, one way to build each diagram, no dry-rb
+
+### Features
+
+* Data elements, one way to build each diagram, no dry-rb ([c711e2d](https://github.com/seuros/diagram-ruby/commit/c711e2df9b69d13186e782245bc82c9a043aa6d5))
+* gitgraph speaks Mermaid's gitGraph; exact numbers, Mermaid gantt forms, no Marshal ([32401d4](https://github.com/seuros/diagram-ruby/commit/32401d43b84561c5745e57ce55ab467af61e83d2))
+
+
+### Bug Fixes
+
+* gantt dates start at year 0100, where Mermaid reads them ([0ba6904](https://github.com/seuros/diagram-ruby/commit/0ba6904fe3421194ef2e0f1a4225a49e1d5c4d9a))
+* owned values, exact integers, Mermaid's gantt calendar ([92f4a1f](https://github.com/seuros/diagram-ruby/commit/92f4a1f69e44910ec394876b5a480325785de11e))
+* refuse what cannot round-trip, strict equality, safe loads ([3e1ba2a](https://github.com/seuros/diagram-ruby/commit/3e1ba2aadcc231063c3b749d89024397587d5ad8))
+
 ## [0.3.5](https://github.com/seuros/diagram-ruby/compare/diagram/v0.3.4...diagram/v0.3.5) (2025-06-15)
 
 
