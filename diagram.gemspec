@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = spec.summary
   spec.homepage = 'https://github.com/seuros/diagram-ruby'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 3.3.0'
+  spec.required_ruby_version = '>= 4.0'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
 
   # Development Dependencies
   spec.add_development_dependency 'bundler', '>= 2.5.5'
-  spec.add_development_dependency 'minitest', '~> 5.0'
+  spec.add_development_dependency 'minitest', '~> 6.0'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rubocop', '~> 1.59'
   spec.add_development_dependency 'rubocop-minitest', '~> 0.34'

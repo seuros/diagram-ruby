@@ -1,9 +1,14 @@
+inherit_from: .rubocop_todo.yml
+inherit_mode:
+  merge:
+    - Exclude
+
 plugins:  
   - rubocop-minitest
   - rubocop-rake
   - rubocop-performance
 AllCops:
-  TargetRubyVersion: 3.3
+  TargetRubyVersion: 4.0
   NewCops: enable
 
 Style/Documentation:

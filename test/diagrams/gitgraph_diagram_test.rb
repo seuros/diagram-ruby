@@ -185,53 +185,60 @@ module Diagrams
 
     def test_commit_duplicate_id
       @diagram.commit(id: 'C1')
-      assert_raises(ArgumentError, /Commit with ID 'C1' already exists/) do
+      error = assert_raises(ArgumentError) do
         @diagram.commit(id: 'C1')
       end
+      assert_match(/Commit with ID 'C1' already exists/, error.message)
     end
 
     def test_branch_duplicate_name
       @diagram.commit(id: 'C1')
       @diagram.branch(name: 'develop')
-      assert_raises(ArgumentError, /Branch name 'develop' already exists/) do
+      error = assert_raises(ArgumentError) do
         @diagram.branch(name: 'develop')
       end
+      assert_match(/Branch name 'develop' already exists/, error.message)
     end
 
     def test_branch_before_first_commit
-      assert_raises(ArgumentError, /Cannot create a branch before the first commit/) do
+      error = assert_raises(ArgumentError) do
         @diagram.branch(name: 'develop')
       end
+      assert_match(/Cannot create a branch before the first commit/, error.message)
     end
 
     def test_branch_from_non_existent_commit
       @diagram.commit(id: 'C1')
-      assert_raises(ArgumentError, /Start commit ID 'C_invalid' does not exist/) do
+      error = assert_raises(ArgumentError) do
         @diagram.branch(name: 'develop', start_commit_id: 'C_invalid')
       end
+      assert_match(/Start commit ID 'C_invalid' does not exist/, error.message)
     end
 
     def test_checkout_non_existent_branch
       @diagram.commit(id: 'C1')
-      assert_raises(ArgumentError, /Branch 'no_such_branch' does not exist. Cannot checkout./) do
+      error = assert_raises(ArgumentError) do
         @diagram.checkout(name: 'no_such_branch')
       end
+      assert_match(/Branch 'no_such_branch' does not exist. Cannot checkout./, error.message)
     end
 
     def test_merge_non_existent_source_branch
       @diagram.commit(id: 'C1')
-      assert_raises(ArgumentError, /Branch 'no_such_branch' does not exist. Cannot merge./) do
+      error = assert_raises(ArgumentError) do
         @diagram.merge(from_branch_name: 'no_such_branch')
       end
+      assert_match(/Branch 'no_such_branch' does not exist. Cannot merge./, error.message)
     end
 
     def test_merge_into_itself
       @diagram.commit(id: 'C1')
       @diagram.branch(name: 'develop')
       @diagram.checkout(name: 'develop')
-      assert_raises(ArgumentError, /Cannot merge branch 'develop' into itself/) do
+      error = assert_raises(ArgumentError) do
         @diagram.merge(from_branch_name: 'develop')
       end
+      assert_match(/Cannot merge branch 'develop' into itself/, error.message)
     end
 
     def test_merge_source_branch_no_commits
@@ -252,11 +259,13 @@ module Diagrams
       @diagram.commit(id: 'C1')
       @diagram.branch(name: 'develop')
       @diagram.commit(id: 'D1')
+      @diagram.checkout(name: 'master')
       # Manually mess up the state for testing the check
       @diagram.branches['master'].attributes[:head_commit_id] = nil
-      assert_raises(ArgumentError, /Current branch 'master' has no commits to merge into./) do
+      error = assert_raises(ArgumentError) do
         @diagram.merge(from_branch_name: 'develop')
       end
+      assert_match(/Current branch 'master' has no commits to merge into./, error.message)
     end
 
     def test_merge_duplicate_commit_id
@@ -270,16 +279,18 @@ module Diagrams
       @diagram.checkout(name: 'develop')
       @diagram.commit(id: 'D2') # Make branches different again
       @diagram.checkout(name: 'master')
-      assert_raises(ArgumentError, /Commit with ID 'M1' already exists/) do
+      error = assert_raises(ArgumentError) do
         @diagram.merge(from_branch_name: 'develop', id: 'M1')
       end
+      assert_match(/Commit with ID 'M1' already exists/, error.message)
     end
 
     def test_cherry_pick_non_existent_commit
       @diagram.commit(id: 'C1')
-      assert_raises(ArgumentError, /Commit with ID 'no_such_commit' does not exist. Cannot cherry-pick./) do
+      error = assert_raises(ArgumentError) do
         @diagram.cherry_pick(commit_id: 'no_such_commit')
       end
+      assert_match(/Commit with ID 'no_such_commit' does not exist. Cannot cherry-pick./, error.message)
     end
 
     def test_cherry_pick_onto_empty_branch
@@ -289,18 +300,20 @@ module Diagrams
       @diagram.checkout(name: 'master')
       # Manually mess up state
       @diagram.branches['master'].attributes[:head_commit_id] = nil
-      assert_raises(ArgumentError, /Current branch 'master' has no commits. Cannot cherry-pick onto it./) do
+      error = assert_raises(ArgumentError) do
         @diagram.cherry_pick(commit_id: 'C1') # Try to pick C1 from feature (where it originated)
       end
+      assert_match(/Current branch 'master' has no commits. Cannot cherry-pick onto it./, error.message)
     end
 
     def test_cherry_pick_commit_already_on_branch
       # Simple check based on commit.branch_name
       @diagram.commit(id: 'C1')
       @diagram.commit(id: 'C2')
-      assert_raises(ArgumentError, /Commit 'C1' is already on the current branch 'master'/) do
+      error = assert_raises(ArgumentError) do
         @diagram.cherry_pick(commit_id: 'C1')
       end
+      assert_match(/Commit 'C1' is already on the current branch 'master'/, error.message)
     end
 
     # --- Diffing Tests ---

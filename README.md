@@ -8,7 +8,7 @@
 **Key Goals:**
 
 *   **Developer Experience & Extensibility:** Clean API, easy to extend.
-*   **Modern Ruby (3.3+):** Uses modern practices like RBS type signatures and `dry-rb` gems.
+*   **Modern Ruby (4.0+):** Uses modern practices like RBS type signatures and `dry-rb` gems.
 *   **Uniform Capabilities:** Consistent serialization (Hash/JSON), comparison, versioning, and checksums across all diagram types.
 *   **Separation of Concerns:** Core gem handles data only, not rendering or persistence.
 

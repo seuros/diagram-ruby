@@ -49,15 +49,17 @@ module Diagrams
 
     def test_add_section_duplicate_title
       @diagram.add_section('Section 1')
-      assert_raises(ArgumentError, /Section with title 'Section 1' already exists/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_section(' Section 1 ')
       end
+      assert_match(/Section with title 'Section 1' already exists/, error.message)
     end
 
     def test_add_section_empty_title
-      assert_raises(ArgumentError, /Section title '' cannot be empty/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_section('  ')
       end
+      assert_match(/Section title '' cannot be empty/, error.message)
     end
 
     def test_add_period_to_default_section
@@ -125,18 +127,21 @@ module Diagrams
     end
 
     def test_add_period_empty_label
-      assert_raises(ArgumentError, /Period label cannot be empty/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_period(period_label: ' ', events: 'Event A')
       end
+      assert_match(/Period label cannot be empty/, error.message)
     end
 
     def test_add_period_empty_events
-      assert_raises(ArgumentError, /Events cannot be empty/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_period(period_label: '2024', events: [])
       end
-      assert_raises(ArgumentError, /Events cannot be empty/) do
+      assert_match(/Events cannot be empty/, error.message)
+      error = assert_raises(ArgumentError) do
         @diagram.add_period(period_label: '2024', events: [' '])
       end
+      assert_match(/Events cannot be empty/, error.message)
     end
 
     def test_serialization_deserialization

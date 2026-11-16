@@ -45,9 +45,10 @@ module Diagrams
 
     def test_add_entity_duplicate_name
       @diagram.add_entity(name: 'CUSTOMER')
-      assert_raises(ArgumentError, /Entity with name 'CUSTOMER' already exists/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_entity(name: 'CUSTOMER')
       end
+      assert_match(/Entity with name 'CUSTOMER' already exists/, error.message)
     end
 
     def test_add_relationship
@@ -88,7 +89,7 @@ module Diagrams
 
     def test_add_relationship_unknown_entity
       @diagram.add_entity(name: 'CUSTOMER')
-      assert_raises(ArgumentError, /One or both entities \('CUSTOMER', 'ORDER'\) not found/) do
+      error = assert_raises(ArgumentError) do
         @diagram.add_relationship(
           entity1: 'CUSTOMER',
           entity2: 'ORDER', # ORDER does not exist
@@ -96,6 +97,7 @@ module Diagrams
           cardinality2: :ZERO_OR_MORE
         )
       end
+      assert_match(/One or both entities \('CUSTOMER', 'ORDER'\) not found/, error.message)
     end
 
     def test_find_entity

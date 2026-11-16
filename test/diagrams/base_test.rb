@@ -26,9 +26,9 @@ module Diagrams
       end
 
       # Minimal class-level from_h for testing factory
-      def self.from_h(_data_hash, version:, _checksum:)
+      def self.from_h(data_hash, version:, _checksum:)
         # Simplified for test purposes
-        nodes_data = _data_hash[:nodes] || []
+        nodes_data = data_hash[:nodes] || []
         nodes = nodes_data.map { |h| Elements::Node.new(h.transform_keys(&:to_sym)) }
         new(version:).tap { |d| d.instance_variable_set(:@nodes, nodes) }
       end
